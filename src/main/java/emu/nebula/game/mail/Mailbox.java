@@ -27,6 +27,8 @@ public class Mailbox extends PlayerManager implements GameDatabaseObject, Iterab
     
     private List<GameMail> list;
     
+    private transient boolean newState;
+    
     @Deprecated // Morphia only
     public Mailbox() {
         
@@ -39,6 +41,10 @@ public class Mailbox extends PlayerManager implements GameDatabaseObject, Iterab
         this.list = new ArrayList<>();
         
         this.save();
+    }
+    
+    public void clearNewState() {
+        this.newState = false;
     }
     
     // TODO optimize to an O(n) algorithm like a map
@@ -55,6 +61,9 @@ public class Mailbox extends PlayerManager implements GameDatabaseObject, Iterab
         
         // Add to mail list
         this.list.add(mail);
+        
+        // Set state
+        this.newState = true;
         
         // Save to database
         Nebula.getGameDatabase().update(this, getUid(), "lastMailId", this.getLastMailId());

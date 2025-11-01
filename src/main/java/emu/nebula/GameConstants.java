@@ -9,8 +9,9 @@ public class GameConstants {
     public static final int INTRO_GUIDE_ID = 1;
 
     public static final int GOLD_ITEM_ID = 1;
+    public static final int ENERGY_BUY_ITEM_ID = 2;
     public static final int EXP_ITEM_ID = 21;
-
+    
     public static final int MAX_ENERGY = 240;
     public static final int ENERGY_REGEN_TIME = 360; // Seconds
     

@@ -2,6 +2,7 @@ package emu.nebula.game.inventory;
 
 import java.util.List;
 
+import emu.nebula.GameConstants;
 import emu.nebula.Nebula;
 import emu.nebula.data.GameData;
 import emu.nebula.game.player.PlayerManager;
@@ -335,6 +336,25 @@ public class Inventory extends PlayerManager {
         
         // Success
         return change.setSuccess(true);
+    }
+    
+    public PlayerChangeInfo buyEnergy() {
+        // Create change info
+        var change = new PlayerChangeInfo();
+        
+        // Make sure we have the gems
+        if (!this.verifyItem(GameConstants.ENERGY_BUY_ITEM_ID, 30)) {
+            return change;
+        }
+        
+        // Remove gems
+        this.removeItem(GameConstants.ENERGY_BUY_ITEM_ID, 30, change);
+        
+        // Add energy
+        this.getPlayer().addEnergy(60, change);
+        
+        // Success
+        return change;
     }
     
     public PlayerChangeInfo useItem(int id, int count, PlayerChangeInfo change) {

@@ -8,11 +8,15 @@ import emu.nebula.proto.Public.Item;
 import emu.nebula.proto.Public.ItemInfo;
 import emu.nebula.proto.Public.ItemTpl;
 import emu.nebula.util.JsonUtils;
+
 import it.unimi.dsi.fastutil.ints.Int2IntLinkedOpenHashMap;
+import it.unimi.dsi.fastutil.ints.Int2IntMap;
+import it.unimi.dsi.fastutil.objects.ObjectBidirectionalIterable;
+import it.unimi.dsi.fastutil.objects.ObjectBidirectionalIterator;
 
 import us.hebi.quickbuf.RepeatedMessage;
 
-public class ItemParamMap extends Int2IntLinkedOpenHashMap {
+public class ItemParamMap extends Int2IntLinkedOpenHashMap implements ObjectBidirectionalIterable<Int2IntMap.Entry> {
     private static final long serialVersionUID = -4186524272780523459L;
     
     @Override @Deprecated
@@ -51,6 +55,13 @@ public class ItemParamMap extends Int2IntLinkedOpenHashMap {
         }
         
         return params;
+    }
+    
+    // Iterable
+
+    @Override
+    public ObjectBidirectionalIterator<Int2IntMap.Entry> iterator() {
+        return this.int2IntEntrySet().iterator();
     }
     
     public FastEntrySet entries() {

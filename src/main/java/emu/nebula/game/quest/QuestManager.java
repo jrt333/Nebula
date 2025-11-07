@@ -1,19 +1,21 @@
 package emu.nebula.game.quest;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 
 import dev.morphia.annotations.Entity;
 import dev.morphia.annotations.Id;
 import emu.nebula.Nebula;
 import emu.nebula.data.GameData;
+import emu.nebula.data.resources.WorldClassDef;
 import emu.nebula.database.GameDatabaseObject;
 import emu.nebula.game.inventory.ItemParamMap;
 import emu.nebula.game.player.Player;
 import emu.nebula.game.player.PlayerChangeInfo;
 import emu.nebula.game.player.PlayerManager;
 import emu.nebula.net.NetMsgId;
+import emu.nebula.util.Bitset;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
@@ -32,6 +34,9 @@ public class QuestManager extends PlayerManager implements GameDatabaseObject {
     // Quests
     private Map<Integer, GameQuest> quests;
     
+    // Level rewards
+    private Bitset levelRewards;
+    
     @Deprecated // Morphia only
     public QuestManager() {
         
@@ -42,10 +47,15 @@ public class QuestManager extends PlayerManager implements GameDatabaseObject {
         this.uid = player.getUid();
         this.claimedActiveIds = new IntOpenHashSet();
         this.quests = new HashMap<>();
+        this.levelRewards = new Bitset();
         
         this.resetDailyQuests();
         
         this.save();
+    }
+    
+    public void saveLevelRewards() {
+        Nebula.getGameDatabase().update(this, this.getUid(), "levelRewards", this.levelRewards);
     }
     
     public synchronized void resetDailyQuests() {
@@ -87,9 +97,9 @@ public class QuestManager extends PlayerManager implements GameDatabaseObject {
         }
     }
     
-    public PlayerChangeInfo receiveReward(int questId) {
+    public PlayerChangeInfo receiveQuestReward(int questId) {
         // Get received quests
-        var claimList = new HashSet<GameQuest>();
+        var claimList = new ArrayList<GameQuest>();
         
         if (questId > 0) {
             // Claim specific quest
@@ -140,7 +150,7 @@ public class QuestManager extends PlayerManager implements GameDatabaseObject {
         Nebula.getGameDatabase().update(this, this.getUid(), "activity", this.getActivity());
         
         // Success
-        return change;
+        return change.setSuccess(true);
     }
     
     public PlayerChangeInfo claimActiveRewards() {
@@ -179,7 +189,54 @@ public class QuestManager extends PlayerManager implements GameDatabaseObject {
         Nebula.getGameDatabase().update(this, this.getUid(), "claimedActiveIds", this.getClaimedActiveIds());
         
         // Success
-        return change;
+        return change.setSuccess(true);
+    }
+    
+    public PlayerChangeInfo receiveWorldClassReward(int id) {
+        // Get rewards we want to claim
+        var claimList = new ArrayList<WorldClassDef>();
+        
+        if (id > 0) {
+            // Claim specific level reward
+            if (this.getLevelRewards().isSet(id)) {
+                var data = GameData.getWorldClassDataTable().get(id);
+                if (data != null) {
+                    claimList.add(data);
+                }
+            }
+        } else {
+            // Claim all
+            for (var data : GameData.getWorldClassDataTable()) {
+                if (this.getLevelRewards().isSet(data.getId())) {
+                    claimList.add(data);
+                }
+            }
+        }
+        
+        // Sanity check
+        if (claimList.isEmpty()) {
+            return null;
+        }
+        
+        // Claim
+        var rewards = new ItemParamMap();
+        
+        for (var data : claimList) {
+            // Add rewards
+            rewards.add(data.getRewards());
+            
+            // Unset level rewards
+            this.getLevelRewards().unsetBit(data.getId());
+        }
+        
+        // Add to inventory
+        var change = this.getPlayer().getInventory().addItems(rewards);
+        
+        // Save to db
+        this.saveLevelRewards();
+        
+        // Success
+        return change.setSuccess(true);
     }
     
     /**

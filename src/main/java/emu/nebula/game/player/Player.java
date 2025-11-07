@@ -23,6 +23,7 @@ import emu.nebula.game.scoreboss.ScoreBossManager;
 import emu.nebula.game.story.StoryManager;
 import emu.nebula.game.tower.StarTowerManager;
 import emu.nebula.net.GameSession;
+import emu.nebula.net.NetMsgId;
 import emu.nebula.net.NetMsgPacket;
 import emu.nebula.proto.PlayerData.DictionaryEntry;
 import emu.nebula.proto.PlayerData.DictionaryTab;
@@ -32,6 +33,7 @@ import emu.nebula.proto.Public.NewbieInfo;
 import emu.nebula.proto.Public.QuestType;
 import emu.nebula.proto.Public.Story;
 import emu.nebula.proto.Public.WorldClass;
+import emu.nebula.proto.Public.WorldClassRewardState;
 import emu.nebula.proto.Public.Title;
 
 import lombok.Getter;
@@ -305,10 +307,15 @@ public class Player implements GameDatabaseObject {
 
         // Check for level ups
         while (this.exp >= expRequired && expRequired > 0) {
+            // Add level
             this.level += 1;
             this.exp -= expRequired;
             
+            // Recalculate exp required
             expRequired = this.getMaxExp();
+            
+            // Set level reward
+            this.getQuestManager().getLevelRewards().setBit(this.level);
         }
         
         // Save to database
@@ -320,6 +327,17 @@ public class Player implements GameDatabaseObject {
                 "exp", 
                 this.getExp()
         );
+        
+        // Save level rewards if we changed it
+        if (oldLevel != this.getLevel()) {
+            this.getQuestManager().saveLevelRewards();
+            
+            this.addNextPackage(
+                NetMsgId.world_class_reward_state_notify, 
+                WorldClassRewardState.newInstance()
+                    .setFlag(getQuestManager().getLevelRewards().toBigEndianByteArray())
+            );
+        }
         
         // Calculate changes
         var proto = WorldClass.newInstance()
@@ -514,7 +532,6 @@ public class Player implements GameDatabaseObject {
         
         state.getMutableMail();
         state.getMutableBattlePass();
-        state.getMutableWorldClassReward();
         state.getMutableFriendEnergy();
         state.getMutableMallPackage();
         state.getMutableAchievement();
@@ -570,6 +587,10 @@ public class Player implements GameDatabaseObject {
         for (int id : this.getQuestManager().getClaimedActiveIds()) {
             proto.addDailyActiveIds(id);
         }
+        
+        
+        state.getMutableWorldClassReward()
+            .setFlag(this.getQuestManager().getLevelRewards().toBigEndianByteArray());
         
         // Add dictionary tabs
         for (var dictionaryData : GameData.getDictionaryTabDataTable()) {

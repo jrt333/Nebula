@@ -36,7 +36,9 @@ public class GameDisc implements GameDatabaseObject {
     private int exp;
     private int phase;
     private int star;
+    
     private boolean read;
+    private boolean avg;
     
     private long createTime;
     
@@ -233,14 +235,22 @@ public class GameDisc implements GameDatabaseObject {
         return change.setSuccess(true);
     }
     
-    public PlayerChangeInfo receiveReadReward() {
+    public PlayerChangeInfo receiveReadReward(int readType) {
+        // Sanity check
+        if (readType == 1) {
+            if (this.isRead()) {
+                return null;
+            }
+        } else if (readType == 2) {
+            if (this.isAvg()) {
+                return null;
+            }
+        } else {
+            return null;
+        }
+        
         // Create change info
         var change = new PlayerChangeInfo();
-        
-        // Sanity check
-        if (this.isRead()) {
-            return change;
-        }
         
         // Add reward
         if (this.getData().getReadReward() != null) {
@@ -250,8 +260,14 @@ public class GameDisc implements GameDatabaseObject {
             this.getPlayer().getInventory().addItem(id, count, change);
         }
         
-        // Set read flag
-        this.read = true;
+        // Set flag
+        if (readType == 1) {
+            this.read = true;
+        } else if (readType == 2) {
+            this.avg = true;
+        }
+        
+        // Save to database
         this.save();
         
         // Success
@@ -268,6 +284,7 @@ public class GameDisc implements GameDatabaseObject {
                 .setPhase(this.getPhase())
                 .setStar(this.getStar())
                 .setRead(this.isRead())
+                .setAvg(this.isAvg())
                 .setCreateTime(this.getCreateTime());
         
         return proto;

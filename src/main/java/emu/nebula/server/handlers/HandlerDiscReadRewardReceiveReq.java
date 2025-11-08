@@ -21,7 +21,8 @@ public class HandlerDiscReadRewardReceiveReq extends NetHandler {
         }
         
         // Set read reward
-        var change = disc.receiveReadReward();
+        var change = disc.receiveReadReward(req.getReadTypeValue());
+        
         if (change == null) {
             return session.encodeMsg(NetMsgId.disc_read_reward_receive_failed_ack);
         }

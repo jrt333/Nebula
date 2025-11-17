@@ -15,7 +15,7 @@ public class CharacterGemPreset {
         
     }
     
-    public CharacterGemPreset(Character character) {
+    public CharacterGemPreset(GameCharacter character) {
         this.gems = new int[] {-1, -1, -1};
     }
     

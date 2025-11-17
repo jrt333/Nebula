@@ -40,7 +40,7 @@ import us.hebi.quickbuf.RepeatedInt;
 
 @Getter
 @Entity(value = "characters", useDiscriminator = false)
-public class Character implements GameDatabaseObject {
+public class GameCharacter implements GameDatabaseObject {
     @Id 
     private ObjectId uid;
     @Indexed
@@ -65,15 +65,15 @@ public class Character implements GameDatabaseObject {
     private CharacterContact contact;
     
     @Deprecated // Morphia only!
-    public Character() {
+    public GameCharacter() {
         
     }
     
-    public Character(Player player, int charId) {
+    public GameCharacter(Player player, int charId) {
         this(player, GameData.getCharacterDataTable().get(charId));
     }
     
-    public Character(Player player, CharacterDef data) {
+    public GameCharacter(Player player, CharacterDef data) {
         this.player = player;
         this.playerUid = player.getUid();
         this.charId = data.getId();
@@ -108,6 +108,14 @@ public class Character implements GameDatabaseObject {
         } else {
             this.contact.setCharacter(this);
         }
+    }
+    
+    public void setLevel(int level) {
+        this.level = level;
+    }
+    
+    public void setAdvance(int advance) {
+        this.advance = advance;
     }
     
     public int getMaxGainableExp() {

@@ -11,7 +11,7 @@ import dev.morphia.annotations.Id;
 import emu.nebula.database.GameDatabaseObject;
 import emu.nebula.game.player.Player;
 import emu.nebula.game.tower.StarTowerBuild;
-import emu.nebula.game.character.Character;
+import emu.nebula.game.character.GameCharacter;
 import emu.nebula.proto.Public.HonorInfo;
 import emu.nebula.proto.ScoreBossRank.ScoreBossRankChar;
 import emu.nebula.proto.ScoreBossRank.ScoreBossRankData;
@@ -155,7 +155,7 @@ public class ScoreBossRankEntry implements GameDatabaseObject {
             
         }
         
-        public ScoreBossCharEntry(Character character) {
+        public ScoreBossCharEntry(GameCharacter character) {
             this.id = character.getCharId();
             this.level = character.getLevel();
         }

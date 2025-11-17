@@ -16,7 +16,7 @@ import lombok.Getter;
 
 @Getter
 public class CharacterStorage extends PlayerManager {
-    private final Int2ObjectMap<Character> characters;
+    private final Int2ObjectMap<GameCharacter> characters;
     private final Int2ObjectMap<GameDisc> discs;
     
     public CharacterStorage(Player player) {
@@ -28,7 +28,7 @@ public class CharacterStorage extends PlayerManager {
     
     // Characters
 
-    public Character getCharacterById(int id) {
+    public GameCharacter getCharacterById(int id) {
         if (id <= 0) {
             return null;
         }
@@ -40,7 +40,7 @@ public class CharacterStorage extends PlayerManager {
         return this.characters.containsKey(id);
     }
     
-    public Character addCharacter(int charId) {
+    public GameCharacter addCharacter(int charId) {
         // Sanity check to make sure we dont have this character already
         if (this.hasCharacter(charId)) {
             return null;
@@ -49,14 +49,14 @@ public class CharacterStorage extends PlayerManager {
         return this.addCharacter(GameData.getCharacterDataTable().get(charId));
     }
 
-    private Character addCharacter(CharacterDef data) {
+    private GameCharacter addCharacter(CharacterDef data) {
         // Sanity check to make sure we dont have this character already
         if (this.hasCharacter(data.getId())) {
             return null;
         }
         
         // Create character
-        var character = new Character(this.getPlayer(), data);
+        var character = new GameCharacter(this.getPlayer(), data);
         
         // Save to database
         character.save();
@@ -66,7 +66,7 @@ public class CharacterStorage extends PlayerManager {
         return character;
     }
     
-    public Collection<Character> getCharacterCollection() {
+    public Collection<GameCharacter> getCharacterCollection() {
         return this.getCharacters().values();
     }
     
@@ -169,7 +169,7 @@ public class CharacterStorage extends PlayerManager {
     public void loadFromDatabase() {
         var db = Nebula.getGameDatabase();
         
-        db.getObjects(Character.class, "playerUid", getPlayerUid()).forEach(character -> {
+        db.getObjects(GameCharacter.class, "playerUid", getPlayerUid()).forEach(character -> {
             // Get data
             var data = GameData.getCharacterDataTable().get(character.getCharId());
             

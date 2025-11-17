@@ -86,8 +86,8 @@ public class Utils {
         return Math.floorDiv(System.currentTimeMillis(), 1000);
     }
 
-    public static int getMinPromotionForLevel(int level) {
-        return Math.max(Math.min((int) ((level - 11) / 10D), 6), 0);
+    public static int getMinAdvanceForLevel(int level) {
+        return Math.max(Math.min((int) ((level - 1) / 10D), 8), 0);
     }
 
     /**

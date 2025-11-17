@@ -12,7 +12,7 @@ import emu.nebula.game.GameContextModule;
 import emu.nebula.game.account.Account;
 import emu.nebula.game.agent.AgentManager;
 import emu.nebula.game.battlepass.BattlePass;
-import emu.nebula.game.character.Character;
+import emu.nebula.game.character.GameCharacter;
 import emu.nebula.game.character.GameDisc;
 import emu.nebula.game.formation.FormationManager;
 import emu.nebula.game.friends.Friendship;
@@ -167,7 +167,7 @@ public class PlayerModule extends GameContextModule {
         var datastore = Nebula.getGameDatabase().getDatastore();
         
         // Delete data from collections
-        datastore.getCollection(Character.class).deleteMany(multiFilter);
+        datastore.getCollection(GameCharacter.class).deleteMany(multiFilter);
         datastore.getCollection(GameDisc.class).deleteMany(multiFilter);
         datastore.getCollection(GameItem.class).deleteMany(multiFilter);
         datastore.getCollection(GameResource.class).deleteMany(multiFilter);

@@ -16,7 +16,7 @@ import us.hebi.quickbuf.RepeatedInt;
 @Getter
 @Entity(useDiscriminator = false)
 public class CharacterContact {
-    private transient Character character;
+    private transient GameCharacter character;
     
     private boolean top;
     private long triggerTime;
@@ -27,7 +27,7 @@ public class CharacterContact {
         
     }
     
-    public CharacterContact(Character character) {
+    public CharacterContact(GameCharacter character) {
         this.character = character;
         this.chats = new HashMap<>();
         this.triggerTime = character.getCreateTime();
@@ -45,7 +45,7 @@ public class CharacterContact {
         }
     }
     
-    public void setCharacter(Character character) {
+    public void setCharacter(GameCharacter character) {
         this.character = character;
     }
     

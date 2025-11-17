@@ -3,6 +3,7 @@ package emu.nebula.command;
 import java.util.List;
 
 import emu.nebula.Nebula;
+import emu.nebula.game.character.GameCharacter;
 import emu.nebula.game.player.Player;
 import emu.nebula.util.Utils;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
@@ -21,9 +22,9 @@ public class CommandArgs {
     private int targetUid;
     private int amount;
     private int level = -1;
-    private int rank = -1;
-    private int promotion = -1;
-    private int stage = -1;
+    private int advance = -1;
+    private int talent = -1;
+    private int skill = -1;
     
     private Int2IntMap map;
     private ObjectSet<String> flags;
@@ -50,17 +51,14 @@ public class CommandArgs {
                     } else if (arg.startsWith("lv")) { // Level
                         this.level = Utils.parseSafeInt(arg.substring(2));
                         it.remove();
-                    } else if (arg.startsWith("r")) { // Rank
-                        this.rank = Utils.parseSafeInt(arg.substring(1));
+                    } else if (arg.startsWith("a")) { // Advance
+                        this.advance = Utils.parseSafeInt(arg.substring(1));
                         it.remove();
-                    } else if (arg.startsWith("e")) { // Eidolons
-                        this.rank = Utils.parseSafeInt(arg.substring(1));
+                    } else if (arg.startsWith("t")) { // Talents
+                        this.talent = Utils.parseSafeInt(arg.substring(1));
                         it.remove();
-                    } else if (arg.startsWith("p")) { // Promotion
-                        this.promotion = Utils.parseSafeInt(arg.substring(1));
-                        it.remove();
-                    } else if (arg.startsWith("s")) { // Stage or Superimposition
-                        this.stage = Utils.parseSafeInt(arg.substring(1));
+                    } else if (arg.startsWith("s")) { // Skill
+                        this.skill = Utils.parseSafeInt(arg.substring(1));
                         it.remove();
                     }
                 } else if (arg.startsWith("-")) { // Flag
@@ -127,4 +125,67 @@ public class CommandArgs {
         return this.flags.contains(flag);
     }
     
+    // Utility commands
+    
+    /**
+     * Changes the properties of an character based on the arguments provided
+     * @param character The targeted character to change
+     * @return A boolean of whether or not any changes were made to the character
+     */
+    public boolean setProperties(GameCharacter character) {
+        boolean hasChanged = false;
+
+        // Try to set level
+        if (this.getLevel() > 0 && character.getLevel() != this.getLevel()) {
+            character.setLevel(Math.min(this.getLevel(), 90));
+            character.setAdvance(Utils.getMinAdvanceForLevel(character.getLevel()));
+            hasChanged = true;
+        }
+        
+        // Try to set advance (ascension level)
+        if (this.getAdvance() >= 0 && character.getAdvance() != this.getAdvance()) {
+            character.setAdvance(Math.min(this.getAdvance(), 8));
+            hasChanged = true;
+        }
+        
+        // Try to set skill trees
+        if (this.getSkill() > 0) {
+            int skill = Math.min(this.getSkill(), 10);
+            
+            for (int i = 0; i < 4; i++) {
+                int s = character.getSkills()[i];
+                
+                if (s != skill) {
+                    character.getSkills()[i] = skill;
+                    hasChanged = true;
+                }
+            }
+        }
+        
+        // Try to set talents
+        if (this.getTalent() >= 0) {
+            // Clear talents first
+            character.getTalents().clear();
+            
+            // Calculate how many talent stars we want to set
+            int talent = Math.min(this.getTalent(), 5);
+            
+            for (int i = 0; i < talent; i++) {
+                // Get bitset offset
+                int offset = i * 16;
+                
+                // First 10 sub nodes of a talent star
+                for (int x = 1; x <= 10; x++) {
+                    character.getTalents().setBit(offset + x);
+                }
+                
+                // Final sub node of a talent star
+                character.getTalents().setBit(offset + 16);
+            }
+            
+            hasChanged = true;
+        }
+        
+        return hasChanged;
+    }
 }

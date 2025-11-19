@@ -21,6 +21,8 @@ import emu.nebula.proto.StarTowerInteract.StarTowerInteractResp;
 import emu.nebula.util.Snowflake;
 import emu.nebula.util.Utils;
 
+import it.unimi.dsi.fastutil.ints.Int2IntMap;
+import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 
@@ -62,15 +64,17 @@ public class StarTowerGame {
     
     // Case
     private int lastCaseId = 0;
-    private int battleCaseIndex = -1;
-    private int selectorCaseIndex = -1;
-    private int hawkerCaseIndex = -1;
     private List<StarTowerCase> cases;
+    private Int2IntMap cachedCases;
+    private int pendingPotentialCases = 0;
     
     // Bag
     private ItemParamMap items;
     private ItemParamMap res;
     private ItemParamMap potentials;
+    
+    // Sub note skill drop list
+    private IntList subNoteDropList;
     
     // Cached build
     private transient StarTowerBuild build;
@@ -108,11 +112,14 @@ public class StarTowerGame {
         this.charIds = new IntArrayList();
 
         this.cases = new ArrayList<>();
+        this.cachedCases = new Int2IntOpenHashMap();
         
         this.items = new ItemParamMap();
         this.res = new ItemParamMap();
         this.potentials = new ItemParamMap();
         this.newInfos = new ItemParamMap();
+        
+        this.subNoteDropList = new IntArrayList();
         
         // Init formation
         for (int i = 0; i < 3; i++) {
@@ -120,8 +127,16 @@ public class StarTowerGame {
             var character = getPlayer().getCharacters().getCharacterById(id);
             
             if (character != null) {
-                this.chars.add(character.toStarTowerProto());
+                // Add to character id list
                 this.charIds.add(id);
+                
+                // Add sub note skill id to drop list
+                int subNoteSkill = character.getData().getElementType().getSubNoteSkillItemId();
+                if (subNoteSkill > 0 && !this.subNoteDropList.contains(subNoteSkill)) {
+                    this.subNoteDropList.add(subNoteSkill);
+                }
+
+                this.chars.add(character.toStarTowerProto());
             } else {
                 this.chars.add(StarTowerChar.newInstance());
             }
@@ -146,11 +161,16 @@ public class StarTowerGame {
             }
         }
         
+        // Finish setting up droppable sub note skills
+        for (int id : COMMON_SUB_NOTE_SKILLS) {
+            this.subNoteDropList.add(id);
+        }
+        
         // Add cases
         this.addCase(new StarTowerCase(CaseType.Battle));
         this.addCase(new StarTowerCase(CaseType.SyncHP));
         
-        // Debug
+        // Always keep the door open
         var doorCase = this.addCase(new StarTowerCase(CaseType.OpenDoor));
         doorCase.setFloorId(this.getStageFloor() + 1);
         
@@ -195,28 +215,25 @@ public class StarTowerGame {
     
     // Cases
     
-    public StarTowerCase getBattleCase() {
-        if (this.getBattleCaseIndex() < 0 || this.getBattleCaseIndex() >= this.getCases().size()) {
+    public StarTowerCase getCase(CaseType type) {
+        // Check if we have any cached case for this case type
+        if (!this.getCachedCases().containsKey(type.getValue())) {
             return null;
         }
         
-        return this.getCases().get(this.getBattleCaseIndex());
+        // Get index of cached case
+        int index = this.getCachedCases().get(type.getValue());
+        
+        // Sanity check just in case
+        if (index < 0 || index >= this.getCases().size()) {
+            return null;
+        }
+        
+        return this.getCases().get(index);
     }
     
-    public StarTowerCase getSelectorCase() {
-        if (this.getSelectorCaseIndex() < 0 || this.getSelectorCaseIndex() >= this.getCases().size()) {
-            return null;
-        }
-        
-        return this.getCases().get(this.getSelectorCaseIndex());
-    }
-    
-    public StarTowerCase getHawkerCase() {
-        if (this.getHawkerCaseIndex() < 0 || this.getHawkerCaseIndex() >= this.getCases().size()) {
-            return null;
-        }
-        
-        return this.getCases().get(this.getHawkerCaseIndex());
+    public void cacheCaseIndex(StarTowerCase towerCase) {
+        this.getCachedCases().put(towerCase.getType().getValue(), this.getCases().size() - 1);
     }
     
     public StarTowerCase addCase(StarTowerCase towerCase) {
@@ -235,15 +252,10 @@ public class StarTowerGame {
             cases.add(towerCase.toProto());
         }
         
-        //
-        if (towerCase.getIds() != null) {
-            this.selectorCaseIndex = this.getCases().size() - 1;
-        } else if (towerCase.getType() == CaseType.Battle) {
-            this.battleCaseIndex = this.getCases().size() - 1;
-        } else if (towerCase.getType() == CaseType.Hawker) {
-            this.hawkerCaseIndex = this.getCases().size() - 1;
-        }
+        // Cache case index
+        this.cacheCaseIndex(towerCase);
         
+        // Complete
         return towerCase;
     }
     
@@ -285,7 +297,7 @@ public class StarTowerGame {
                 // Add potential
                 this.getPotentials().put(id, nextLevel);
                 
-                // Add change
+                // Add to change info
                 var info = PotentialInfo.newInstance()
                         .setTid(id)
                         .setLevel(count);
@@ -296,7 +308,7 @@ public class StarTowerGame {
                 // Add to items
                 this.getItems().add(id, count);
                 
-                // Add change
+                // Add to change info
                 var info = TowerItemInfo.newInstance()
                         .setTid(id)
                         .setQty(count);
@@ -310,7 +322,7 @@ public class StarTowerGame {
                 // Add to res
                 this.getRes().add(id, count);
                 
-                // Add change
+                // Add to change info
                 var info = TowerResInfo.newInstance()
                         .setTid(id)
                         .setQty(count);
@@ -352,7 +364,7 @@ public class StarTowerGame {
     
     private PlayerChangeInfo addRandomSubNoteSkills(PlayerChangeInfo change) {
         int count = Utils.randomRange(1, 3);
-        int id = Utils.randomElement(COMMON_SUB_NOTE_SKILLS);
+        int id = Utils.randomElement(this.getSubNoteDropList());
         
         this.addItem(id, count, change);
         
@@ -442,15 +454,20 @@ public class StarTowerGame {
             
             this.addItem(GameConstants.STAR_TOWER_GOLD_ITEM_ID, money, change);
             
-            // Create potential selector
-            int charId = this.getChars().get(battleCount % this.getCharIds().size()).getId();
-            var potentialCase = this.createPotentialSelector(charId);
+            // Add potential selectors
+            this.pendingPotentialCases += 1;
             
-            // Add case
-            this.addCase(rsp.getMutableCases(), potentialCase);
+            // Handle pending potential selectors
+            if (this.pendingPotentialCases > 0) {
+                // Create potential selector
+                var potentialCase = this.createPotentialSelector(this.getRandomCharId());
+                this.addCase(rsp.getMutableCases(), potentialCase);
+                
+                this.pendingPotentialCases--;
+            }
             
             // Add sub note skills
-            var battleCase = this.getBattleCase();
+            var battleCase = this.getCase(CaseType.Battle);
             if (battleCase != null) {
                 int subNoteSkills = battleCase.getSubNoteSkillNum();
                 this.addRandomSubNoteSkills(subNoteSkills, change);
@@ -472,7 +489,7 @@ public class StarTowerGame {
     public StarTowerInteractResp onSelect(StarTowerInteractReq req, StarTowerInteractResp rsp) {
         var index = req.getMutableSelectReq().getIndex();
         
-        var selectorCase = this.getSelectorCase();
+        var selectorCase = this.getCase(CaseType.SelectSpecialPotential);
         if (selectorCase == null) {
             return rsp;
         }
@@ -487,6 +504,15 @@ public class StarTowerGame {
         
         // Set change
         rsp.setChange(change.toProto());
+        
+        // Handle pending potential selectors
+        if (this.pendingPotentialCases > 0) {
+            // Create potential selector
+            var potentialCase = this.createPotentialSelector(this.getRandomCharId());
+            this.addCase(rsp.getMutableCases(), potentialCase);
+            
+            this.pendingPotentialCases--;
+        }
         
         return rsp;
     }
@@ -527,11 +553,9 @@ public class StarTowerGame {
         }
         
         // Clear cases
-        this.battleCaseIndex = -1;
-        this.selectorCaseIndex = -1;
-        this.hawkerCaseIndex = -1;
         this.lastCaseId = 0;
         this.cases.clear();
+        this.cachedCases.clear();
         
         // Add cases
         var syncHpCase = new StarTowerCase(CaseType.SyncHP);
@@ -587,7 +611,7 @@ public class StarTowerGame {
         rsp.getMutableNilResp();
         
         // Get hawker case
-        var shop = this.getHawkerCase();
+        var shop = this.getCase(CaseType.Hawker);
         if (shop == null || shop.getGoodsList() == null) {
             return rsp;
         }

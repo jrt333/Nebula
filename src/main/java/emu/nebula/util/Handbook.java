@@ -46,7 +46,10 @@ public class Handbook {
                 CharacterDef data = GameData.getCharacterDataTable().get(id);
                 writer.print(data.getId());
                 writer.print(" : ");
-                writer.println(languageKey.getOrDefault(data.getName(), data.getName()));
+                writer.print(languageKey.getOrDefault(data.getName(), data.getName()));
+                writer.print(" (");
+                writer.print(data.getElementType().toString());
+                writer.println(")");
             }
             
             // Dump characters

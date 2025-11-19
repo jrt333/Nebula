@@ -5,6 +5,7 @@ import java.util.List;
 import emu.nebula.data.BaseDef;
 import emu.nebula.data.GameData;
 import emu.nebula.data.ResourceType;
+import emu.nebula.game.character.ElementType;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import lombok.Getter;
 
@@ -16,6 +17,7 @@ public class CharacterDef extends BaseDef {
     private boolean Available;
     private String Name;
     private int Grade;
+    private int EET;
     
     private int DefaultSkinId;
     private int AdvanceSkinId;
@@ -29,6 +31,7 @@ public class CharacterDef extends BaseDef {
     
     private int[] GemSlots;
     
+    private transient ElementType elementType;
     private transient List<ChatDef> chats;
     
     @Override
@@ -51,6 +54,7 @@ public class CharacterDef extends BaseDef {
     
     @Override
     public void onLoad() {
+        this.elementType = ElementType.getByValue(this.EET);
         this.chats = new ObjectArrayList<>();
     }
 }

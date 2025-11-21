@@ -53,6 +53,8 @@ public class GameCharacter implements GameDatabaseObject {
     private int advance;
     private int level;
     private int exp;
+    private int affinityLevel;
+    private int affinityExp;
     private int skin;
     private int[] skills;
     private Bitset talents;
@@ -378,6 +380,87 @@ public class GameCharacter implements GameDatabaseObject {
         return true;
     }
     
+    // Affinity
+    
+    public int getMaxAffinityExp() {
+        var data = GameData.getAffinityLevelDataTable().get(this.affinityLevel + 1);
+        return data != null ? data.getNeedExp() : 0;
+    }
+    
+    public void addAffinityExp(int amount) {
+        // Setup
+        int expRequired = this.getMaxAffinityExp();
+
+        // Add exp
+        this.affinityExp += amount;
+
+        // Check for level ups
+        while (this.affinityExp >= expRequired && expRequired > 0) {
+            this.affinityLevel += 1;
+            this.affinityExp -= expRequired;
+            
+            expRequired = this.getMaxAffinityExp();
+        }
+        
+        // Clamp exp
+        if (expRequired <= 0) {
+            this.affinityExp = 0;
+        }
+        
+        // Save to database
+        this.save();
+    }
+
+    public PlayerChangeInfo sendGift(ItemParamMap items) {
+        // Verify that the player has the items
+        if (!this.getPlayer().getInventory().hasItems(items)) {
+            return null;
+        }
+        
+        // Caluclate amount of exp to gain
+        var charDescription = this.getData().getDes();
+        int exp = 0;
+        int count = 0;
+        
+        for (var item : items) {
+            // Get data
+            var gift = GameData.getAffinityGiftDataTable().get(item.getIntKey());
+            if (gift == null) {
+                return null;
+            }
+            
+            // Calculate amount
+            double amount = gift.getBaseAffinity() * item.getIntValue();
+            
+            if (charDescription.isPreferGift(gift)) {
+                amount = amount * 1.5D;
+            } else if (charDescription.isHateGift(gift)) {
+                amount = amount * 0.8D;
+            }
+            
+            // Add
+            exp += (int) amount;
+            count += item.getIntValue();
+        }
+        
+        // Sanity check
+        if (exp <= 0) {
+            return null;
+        }
+        
+        // Add affinity exp
+        this.addAffinityExp(exp);
+        
+        // Trigger quest
+        this.getPlayer().triggerQuest(QuestCondType.GiftGiveTotal, count);
+        
+        // Remove items
+        var change = this.getPlayer().getInventory().removeItems(items);
+        
+        // Success
+        return change;
+    }
+    
     // Gems
     
     public boolean hasGemPreset(int index) {
@@ -662,6 +745,8 @@ public class GameCharacter implements GameDatabaseObject {
                 .setLevel(this.getLevel())
                 .setSkin(this.getSkin())
                 .setAdvance(this.getAdvance())
+                .setAffinityLevel(this.getAffinityLevel())
+                .setAffinityExp(this.getAffinityExp())
                 .setTalentNodes(this.getTalents().toByteArray())
                 .addAllSkillLvs(this.getSkills())
                 .setCreateTime(this.getCreateTime());
@@ -705,6 +790,7 @@ public class GameCharacter implements GameDatabaseObject {
                 .setId(this.getCharId())
                 .setAdvance(this.getAdvance())
                 .setLevel(this.getLevel())
+                .setAffinityLevel(this.getAffinityLevel())
                 .setTalentNodes(this.getTalents().toByteArray())
                 .addAllSkillLvs(this.getSkills());
         

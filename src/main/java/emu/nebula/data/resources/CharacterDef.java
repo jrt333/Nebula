@@ -31,12 +31,17 @@ public class CharacterDef extends BaseDef {
     
     private int[] GemSlots;
     
+    private transient CharacterDesDef des;
     private transient ElementType elementType;
     private transient List<ChatDef> chats;
     
     @Override
     public int getId() {
         return Id;
+    }
+    
+    protected void setDes(CharacterDesDef des) {
+        this.des = des;
     }
 
     public int getSkillsUpgradeGroup(int index) {

@@ -25,6 +25,7 @@ import emu.nebula.game.quest.QuestCondType;
 import emu.nebula.net.NetMsgId;
 import emu.nebula.proto.Notify.Skin;
 import emu.nebula.proto.Notify.SkinChange;
+import emu.nebula.proto.Public.AffinityInfo;
 import emu.nebula.proto.Public.Char;
 import emu.nebula.proto.Public.CharGemPreset;
 import emu.nebula.proto.Public.CharGemSlot;
@@ -857,6 +858,15 @@ public class GameCharacter implements GameDatabaseObject {
             
             proto.addGems(info);
         }
+        
+        return proto;
+    }
+    
+    public AffinityInfo getAffinityProto() {
+        var proto = AffinityInfo.newInstance()
+                .setCharId(this.getCharId())
+                .setAffinityLevel(this.getAffinityLevel())
+                .setAffinityExp(this.getAffinityExp());
         
         return proto;
     }

@@ -6,7 +6,7 @@ For any extra support, questions, or discussions, check out our [Discord](https:
 
 ### Notable features
 - Basic profile features
-- Character system implemented (except for affinity)
+- Character system
 - Inventory/Discs working
 - Energy system
 - Mail system
@@ -17,7 +17,7 @@ For any extra support, questions, or discussions, check out our [Discord](https:
 - Friend system (sending energy not implemented)
 - Shop (using only in-game currency)
 - Commissions
-- Heartlink (missing advanced affinity related features)
+- Heartlink
 - Monoliths (completeable but many other features missing)
 - Bounty Trials
 - Menance Arena

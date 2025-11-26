@@ -14,6 +14,7 @@ import emu.nebula.game.account.Account;
 import emu.nebula.game.agent.AgentManager;
 import emu.nebula.game.battlepass.BattlePassManager;
 import emu.nebula.game.character.CharacterStorage;
+import emu.nebula.game.dating.DatingManager;
 import emu.nebula.game.formation.FormationManager;
 import emu.nebula.game.friends.FriendList;
 import emu.nebula.game.gacha.GachaManager;
@@ -83,6 +84,7 @@ public class Player implements GameDatabaseObject {
     private final transient CharacterStorage characters;
     private final transient FriendList friendList;
     private final transient BattlePassManager battlePassManager;
+    private final transient DatingManager datingManager;
     private final transient StarTowerManager starTowerManager;
     private final transient InstanceManager instanceManager;
     private final transient InfinityTowerManager infinityTowerManager;
@@ -110,6 +112,7 @@ public class Player implements GameDatabaseObject {
         this.characters = new CharacterStorage(this);
         this.friendList = new FriendList(this);
         this.battlePassManager = new BattlePassManager(this);
+        this.datingManager = new DatingManager(this);
         this.starTowerManager = new StarTowerManager(this);
         this.instanceManager = new InstanceManager(this);
         this.infinityTowerManager = new InfinityTowerManager(this);

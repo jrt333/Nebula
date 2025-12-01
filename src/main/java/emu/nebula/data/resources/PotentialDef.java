@@ -13,6 +13,8 @@ public class PotentialDef extends BaseDef {
     private int MaxLevel;
     private int[] BuildScore;
     
+    private String BriefDesc;
+    
     @Override
     public int getId() {
         return Id;

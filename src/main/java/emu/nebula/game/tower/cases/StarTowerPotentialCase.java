@@ -54,8 +54,8 @@ public class StarTowerPotentialCase extends StarTowerBaseCase {
         if (potentialCase != null) {
             // Create potential selector
             this.getGame().addCase(rsp.getMutableCases(), potentialCase);
-        } else {
-            // Add door case here
+        } else if (!this.getRoom().hasDoor()) {
+            // Add door case here if door hasn't opened yet
             this.getGame().createExit(rsp.getMutableCases());
         }
         

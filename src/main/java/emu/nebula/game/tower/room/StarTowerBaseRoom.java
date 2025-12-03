@@ -5,6 +5,7 @@ import java.util.List;
 
 import emu.nebula.data.resources.StarTowerStageDef;
 import emu.nebula.game.tower.StarTowerGame;
+import emu.nebula.game.tower.cases.CaseType;
 import emu.nebula.game.tower.cases.StarTowerBaseCase;
 import emu.nebula.game.tower.cases.StarTowerSyncHPCase;
 import emu.nebula.proto.PublicStarTower.InteractEnterReq;
@@ -30,6 +31,9 @@ public class StarTowerBaseRoom {
     private int lastCaseId = 0;
     private List<StarTowerBaseCase> cases;
     
+    // Misc
+    private boolean hasDoor;
+    
     public StarTowerBaseRoom(StarTowerGame game, StarTowerStageDef stage) {
         this.game = game;
         this.stage = stage;
@@ -38,6 +42,10 @@ public class StarTowerBaseRoom {
     
     public int getType() {
         return stage.getRoomType();
+    }
+    
+    public boolean hasDoor() {
+        return this.hasDoor;
     }
     
     // Map info
@@ -83,6 +91,11 @@ public class StarTowerBaseRoom {
         // Add case to proto
         if (cases != null) {
             cases.add(towerCase.toProto());
+        }
+        
+        // Check if door case
+        if (towerCase.getType() == CaseType.OpenDoor) {
+            this.hasDoor = true;
         }
         
         // Complete

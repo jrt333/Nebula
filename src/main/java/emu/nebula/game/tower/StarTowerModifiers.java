@@ -25,6 +25,10 @@ public class StarTowerModifiers {
     private int shopRerollCount;
     private int shopRerollPrice;
     
+    private boolean shopDiscountTier1;
+    private boolean shopDiscountTier2;
+    private boolean shopDiscountTier3;
+    
     public StarTowerModifiers(StarTowerGame game) {
         this.game = game;
         
@@ -69,6 +73,10 @@ public class StarTowerModifiers {
         if (this.shopRerollCount > 0) {
             this.shopRerollPrice = 100;
         }
+        
+        this.shopDiscountTier1 = this.hasGrowthNode(20202) && game.getDifficulty() >= 3;
+        this.shopDiscountTier2 = this.hasGrowthNode(20502) && game.getDifficulty() >= 4;
+        this.shopDiscountTier3 = this.hasGrowthNode(20802) && game.getDifficulty() >= 5;
     }
     
     public boolean hasGrowthNode(int nodeId) {

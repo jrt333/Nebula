@@ -2,6 +2,7 @@ package emu.nebula.game.tower.cases;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import emu.nebula.GameConstants;
 import emu.nebula.game.tower.StarTowerShopGoods;
@@ -10,6 +11,8 @@ import emu.nebula.proto.PublicStarTower.HawkerGoods;
 import emu.nebula.proto.PublicStarTower.StarTowerRoomCase;
 import emu.nebula.proto.StarTowerInteract.StarTowerInteractReq;
 import emu.nebula.proto.StarTowerInteract.StarTowerInteractResp;
+import emu.nebula.util.Utils;
+
 import lombok.Getter;
 
 @Getter
@@ -39,7 +42,42 @@ public class StarTowerHawkerCase extends StarTowerBaseCase {
             this.addGoods(new StarTowerShopGoods(1, 1, 200));
         }
         
-        // TODO apply discounts based on star tower talents
+        // Apply discounts based on star tower talents
+        if (getModifiers().isShopDiscountTier1()) {
+            this.applyDiscount(1.0, 2, 0.8);
+        }
+        if (getModifiers().isShopDiscountTier2()) {
+            this.applyDiscount(0.3, 1, 0.5);
+        }
+        if (getModifiers().isShopDiscountTier3()) {
+            this.applyDiscount(1.0, 1, 0.5);
+        }
+    }
+    
+    private void applyDiscount(double chance, int times, double percentage) {
+        // Check chance
+        double random = Utils.generateRandomDouble();
+        
+        if (random > chance) {
+            return;
+        }
+        
+        // Create goods list
+        var list = this.getGoods().values().stream()
+                .filter(g -> !g.hasDiscount())
+                .collect(Collectors.toList());
+        
+        // Apply discounts
+        for (int i = 0; i < times; i++) {
+            // Sanity check
+            if (list.isEmpty()) {
+                break;
+            }
+            
+            // Get goods and apply discount
+            var goods = Utils.randomElement(list, true);
+            goods.applyDiscount(percentage);
+        }
     }
     
     public void addGoods(StarTowerShopGoods goods) {
@@ -145,8 +183,12 @@ public class StarTowerHawkerCase extends StarTowerBaseCase {
                     .setSid(sid)
                     .setType(goods.getType())
                     .setGoodsId(102) // ?
-                    .setPrice(goods.getPrice())
+                    .setPrice(goods.getDisplayPrice())
                     .setTag(1);
+            
+            if (goods.hasDiscount()) {
+                info.setDiscount(goods.getPrice());
+            }
             
             hawker.addList(info);
         }

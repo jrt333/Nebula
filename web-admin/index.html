@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>星塔旅人 GM 后台（Web）</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="page">
+    <header class="app-header">
+      <div class="brand">
+        <div class="logo">GM</div>
+        <div>
+          <h1>星塔旅人 · 网页后台</h1>
+          <p>参考桌面后台与服务端命令的轻量控制台</p>
+        </div>
+      </div>
+      <div class="status-badges">
+        <span class="badge">REST /api/command</span>
+        <span class="badge badge-accent">样式参考 124.220.188.190:688/lqnb/gm</span>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="panel wide">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">连接设置</p>
+            <h2>服务器 / Token / UID</h2>
+          </div>
+          <button id="btnSaveConfig" class="primary">保存配置</button>
+        </div>
+        <div class="form-grid">
+          <label class="field">
+            <span>服务端地址</span>
+            <input id="inputServer" type="text" placeholder="例如：http://127.0.0.1:8080" />
+          </label>
+          <label class="field">
+            <span>远程密钥（Admin Key 或玩家 Token）</span>
+            <input id="inputToken" type="password" placeholder="必填，用于通过 /api/command 调用" />
+          </label>
+          <label class="field">
+            <span>目标 UID（可选，用于 @uid 定向）</span>
+            <input id="inputUid" type="text" placeholder="例如：100001" />
+          </label>
+        </div>
+        <p class="help-text">配置会保存在浏览器本地存储，仅在当前设备生效。</p>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">命令面板</p>
+            <h2>分类 / 指令 / 参数</h2>
+          </div>
+          <div class="pill">自动拼接 @UID 与特殊前缀</div>
+        </div>
+
+        <div class="form-grid compact">
+          <label class="field">
+            <span>命令分类</span>
+            <select id="categorySelect"></select>
+          </label>
+          <label class="field">
+            <span>指令</span>
+            <select id="commandSelect"></select>
+          </label>
+        </div>
+
+        <div id="commandDescription" class="description"></div>
+        <div id="commandFields" class="field-stack"></div>
+
+        <div class="preview-row">
+          <div>
+            <p class="eyebrow">预览</p>
+            <p id="preview" class="command-preview">-</p>
+          </div>
+          <div class="actions">
+            <button id="btnExecute" class="primary">执行命令</button>
+            <button id="btnCopy" class="ghost">复制命令</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">物品邮件</p>
+            <h2>一键发送欢迎礼包</h2>
+          </div>
+          <div class="pill">使用 !mail GM 命令</div>
+        </div>
+
+        <div class="mail-grid">
+          <label class="field">
+            <span>邮件标题</span>
+            <input id="mailSubject" type="text" readonly value="欢迎来到大鸟转转转-星塔旅人！" />
+          </label>
+          <label class="field">
+            <span>发送者</span>
+            <input id="mailSender" type="text" readonly value="GM" />
+          </label>
+          <label class="field wide">
+            <span>正文</span>
+            <textarea id="mailBody" rows="2" readonly>欢迎来到大鸟转转转-星塔旅人！QQ交流群：531390126，祝你游戏愉快！</textarea>
+          </label>
+        </div>
+
+        <div class="attachments">
+          <div class="attachments-header">
+            <div>
+              <p class="eyebrow">附件</p>
+              <p>从物品列表中选取（支持搜索 ID 或名称），数量默认为 1。</p>
+            </div>
+            <button id="btnClearAttachment" class="ghost">清空附件</button>
+          </div>
+          <div class="attachment-form">
+            <div class="field">
+              <span>物品</span>
+              <input id="itemInput" list="itemList" placeholder="输入物品名或ID" />
+              <datalist id="itemList"></datalist>
+            </div>
+            <div class="field">
+              <span>数量</span>
+              <input id="itemQty" type="number" min="1" value="1" />
+            </div>
+            <button id="btnAddAttachment" class="primary">加入</button>
+          </div>
+          <div id="attachmentChips" class="chip-row"></div>
+        </div>
+
+        <div class="preview-row">
+          <div>
+            <p class="eyebrow">邮件命令预览</p>
+            <p id="mailPreview" class="command-preview">-</p>
+          </div>
+          <div class="actions">
+            <button id="btnSendMail" class="primary">发送邮件</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel log-panel">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">执行记录</p>
+            <h2>最新返回</h2>
+          </div>
+          <button id="btnClearLog" class="ghost">清空记录</button>
+        </div>
+        <div id="logArea" class="log-area"></div>
+      </section>
+    </main>
+  </div>
+  <script src="data/js/items.zh_CN.js"></script>
+  <script src="data/js/characters.zh_CN.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

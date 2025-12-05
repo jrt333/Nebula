@@ -141,6 +141,14 @@ public class HttpServer {
         if (this.getType().runGame()) {
             this.addGameServerRoutes();
         }
+
+        // CORS preflight for the remote console
+        getApp().options("/api/command", ctx -> {
+            ctx.header("Access-Control-Allow-Origin", "*");
+            ctx.header("Access-Control-Allow-Methods", "POST, OPTIONS");
+            ctx.header("Access-Control-Allow-Headers", "Content-Type");
+            ctx.status(204);
+        });
         
         // Custom api route(s)
         getApp().post("/api/command", new RemoteHandler());

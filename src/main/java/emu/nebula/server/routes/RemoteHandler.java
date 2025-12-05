@@ -20,6 +20,9 @@ public class RemoteHandler implements Handler {
 
     @Override
     public void handle(@NotNull Context ctx) throws Exception {
+        // Allow cross-origin calls for the standalone web console
+        ctx.header("Access-Control-Allow-Origin", "*");
+        ctx.header("Access-Control-Allow-Headers", "Content-Type");
         if (!Nebula.getConfig().getRemoteCommand().useRemoteServices) {
             ctx.status(403);
             ctx.result("{\"Code\":403,\"Msg\":\"RemoteServer not enable\"}");
@@ -40,11 +43,9 @@ public class RemoteHandler implements Handler {
 
         // Check admin key
         if (token.equals(adminKey)) {
-            Nebula.getCommandManager().invoke(null, command);
+            var result = Nebula.getCommandManager().invoke(null, command);
             Nebula.getLogger().warn("\u001B[38;2;252;186;3mRemote Server (Using Admin Key) sent command: /" + command + "\u001B[0m");
-            ctx.status(200);
-            ctx.contentType(ContentType.APPLICATION_JSON);
-            ctx.result("{\"Code\":200,\"Data\":{},\"Msg\":\"Command executed\"}");
+            writeCommandResponse(ctx, result);
             return;
         }
 
@@ -78,16 +79,23 @@ public class RemoteHandler implements Handler {
             Nebula.getLogger().info("Remote Player Request [" + player.getUid() + "]: " + finalCommand);
 
             // Execute as console (null sender) but targeting the player
-            Nebula.getCommandManager().invoke(null, finalCommand);
+            var result = Nebula.getCommandManager().invoke(null, finalCommand);
 
-            ctx.status(200);
-            ctx.contentType(ContentType.APPLICATION_JSON);
-            ctx.result("{\"Code\":200,\"Data\":{},\"Msg\":\"Command executed\"}");
+            writeCommandResponse(ctx, result);
             return;
         }
 
         // Invalid token
         ctx.status(403);
         ctx.result("{\"Code\":403,\"Msg\":\"Invalid token\"}");
+    }
+    private void writeCommandResponse(Context ctx, emu.nebula.command.CommandResult result) {
+        boolean success = result.getCommand() != null && (result.getMessage() == null || !result.getMessage().startsWith("Error -"));
+        int code = success ? 200 : 400;
+        String msg = result.getMessage() == null ? "" : result.getMessage();
+
+        ctx.status(code);
+        ctx.contentType(ContentType.APPLICATION_JSON);
+        ctx.result(String.format("{\"Code\":%d,\"Data\":{},\"Msg\":\"%s\"}", code, msg));
     }
 }

@@ -93,7 +93,12 @@ public class CommandArgs {
         // Get target player
         if (targetUid != 0) {
             if (Nebula.getGameContext() != null) {
-                target = Nebula.getGameContext().getPlayerModule().getCachedPlayerByUid(targetUid);
+                var playerModule = Nebula.getGameContext().getPlayerModule();
+                // Prefer an online player, but load from database if offline so remote commands can still target them
+                target = playerModule.getCachedPlayerByUid(targetUid);
+                if (target == null) {
+                    target = playerModule.loadPlayerByUid(targetUid);
+                }
             }
         } else {
             target = sender;

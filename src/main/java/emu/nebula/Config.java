@@ -15,8 +15,8 @@ public class Config {
 
     public KeystoreInfo keystore = new KeystoreInfo();
 
-    public HttpServerConfig httpServer = new HttpServerConfig(80);
-    public GameServerConfig gameServer = new GameServerConfig(80);
+    public HttpServerConfig httpServer = new HttpServerConfig(8080);
+    public GameServerConfig gameServer = new GameServerConfig(8080);
 
     public ServerOptions serverOptions = new ServerOptions();
     public ServerRates serverRates = new ServerRates();
@@ -24,7 +24,7 @@ public class Config {
     public RemoteCommand remoteCommand = new RemoteCommand();
 
     public int customDataVersion = 0;
-    public String region = "global";
+    public String region = "tw";
     
     public String resourceDir = "./resources";
     public String webFilesDir = "./web";
@@ -34,7 +34,7 @@ public class Config {
     public static class DatabaseInfo {
         public String uri = "mongodb://localhost:27017";
         public String collection = "nebula";
-        public boolean useInternal = true;
+        public boolean useInternal = false;
     }
 
     @Getter
@@ -55,7 +55,7 @@ public class Config {
         public boolean useSSL = false;
         public String bindAddress = "0.0.0.0";
         public int bindPort;
-        public String publicAddress = "127.0.0.1"; // Will return bindAddress if publicAddress is null
+        public String publicAddress = "81.69.37.56"; // Will return bindAddress if publicAddress is null
         public Integer publicPort; // Will return bindPort if publicPort is null
 
         public ServerConfig(int port) {
@@ -114,7 +114,7 @@ public class Config {
 
     @Getter
     public static class ServerRates {
-        public double exp = 1.0;
+        public double exp = 5.0;
     }
 
     @Getter
@@ -125,7 +125,7 @@ public class Config {
 
     @Getter
     public static class RemoteCommand {
-        public boolean useRemoteServices = false;
+        public boolean useRemoteServices = true;
         public String serverAdminKey = "HJHASDPIIQWEASDHHAN";
     }
 
@@ -137,14 +137,14 @@ public class Config {
         public List<ItemParam> attachments;
 
         public WelcomeMail() {
-            this.title = "Welcome to a Nebula server";
-            this.sender = "Server";
-            this.content = "Welcome to Nebula! Please take these items as a starter gift.";
+            this.title = "欢迎来到大鸟转转转-星塔旅人！";
+            this.sender = "GM";
+            this.content = "欢迎来到大鸟转转转-星塔旅人！QQ交流群：531390126，祝你游戏愉快！";
             this.attachments = List.of(
-                    new ItemParam(86009, 1),
-                    new ItemParam(86002, 1),
-                    new ItemParam(1, 1_000_000),
-                    new ItemParam(2, 30_000));
+                    new ItemParam(86009, 20),
+                    new ItemParam(86002, 20),
+                    new ItemParam(1, 9_000_000),
+                    new ItemParam(2, 90_000));
         }
     }
 

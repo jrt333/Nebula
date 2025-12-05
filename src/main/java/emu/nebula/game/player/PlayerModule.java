@@ -51,7 +51,28 @@ public class PlayerModule extends GameContextModule {
         this.cachedPlayers.put(player.getUid(), player);
         this.cachedPlayersByAccount.put(player.getAccountUid(), player);
     }
-    
+    /**
+     * Loads a player by uid, initializing their managers and caching the instance for future lookups.
+     * This is intended for command handlers that need to target offline players (e.g. remote GM tools).
+     */
+    public synchronized Player loadPlayerByUid(int uid) {
+        // Check cache first
+        Player player = this.cachedPlayers.get(uid);
+
+        if (player == null) {
+            // Pull raw player document
+            player = Nebula.getGameDatabase().getObjectByUid(Player.class, uid);
+
+            if (player != null) {
+                // Fully initialize transient managers so mail/inventory etc. can be used
+                player.onLoad();
+                this.addToCache(player);
+            }
+        }
+
+        return player;
+    }
+
     public void removeFromCache(Player player) {
         this.cachedPlayers.remove(player.getUid());
         this.cachedPlayersByAccount.remove(player.getAccountUid());

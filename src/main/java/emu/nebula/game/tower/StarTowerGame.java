@@ -22,6 +22,7 @@ import emu.nebula.game.tower.cases.StarTowerDoorCase;
 import emu.nebula.game.tower.cases.StarTowerHawkerCase;
 import emu.nebula.game.tower.cases.StarTowerNpcRecoveryHPCase;
 import emu.nebula.game.tower.cases.StarTowerPotentialCase;
+import emu.nebula.game.tower.cases.StarTowerSelectSpecialPotentialCase;
 import emu.nebula.game.tower.cases.StarTowerStrengthenMachineCase;
 import emu.nebula.game.tower.room.RoomType;
 import emu.nebula.game.tower.room.StarTowerBaseRoom;
@@ -179,11 +180,8 @@ public class StarTowerGame {
             this.subNoteDropList.add(id);
         }
         
-        // Add starting coin directly
-        int coin = this.getModifiers().getStartingCoin();
-        if (coin > 0) {
-            this.getRes().add(GameConstants.TOWER_COIN_ITEM_ID, coin);
-        }
+        // Add starting items
+        this.getModifiers().addStartingItems();
     }
     
     public Player getPlayer() {
@@ -490,18 +488,18 @@ public class StarTowerGame {
     /**
      * Creates a potential selector for a random character
      */
-    public StarTowerBaseCase createPotentialSelector() {
+    public StarTowerPotentialCase createPotentialSelector() {
         return this.createPotentialSelector(0);
     }
     
-    public StarTowerBaseCase createPotentialSelector(int charId) {
+    public StarTowerPotentialCase createPotentialSelector(int charId) {
         return this.createPotentialSelector(charId, false);
     }
     
     /**
      * Creates a potential selector for the specified character
      */
-    public StarTowerBaseCase createPotentialSelector(int charId, boolean rareOnly) {
+    public StarTowerPotentialCase createPotentialSelector(int charId, boolean rareOnly) {
         // Check character id
         if (charId <= 0) {
             charId = this.getRandomCharId();
@@ -579,10 +577,14 @@ public class StarTowerGame {
         }
         
         // Creator potential selector case
-        return new StarTowerPotentialCase(this.getTeamLevel(), selector);
+        if (rareOnly) {
+            return new StarTowerSelectSpecialPotentialCase(this, charId, selector);
+        } else {
+            return new StarTowerPotentialCase(this, charId, selector);
+        }
     }
     
-    public StarTowerBaseCase createStrengthenSelector() {
+    public StarTowerPotentialCase createStrengthenSelector() {
         // Random potentials list
         var potentials = new IntArrayList();
         
@@ -628,7 +630,7 @@ public class StarTowerGame {
         }
         
         // Creator potential selector case
-        return new StarTowerPotentialCase(this.getTeamLevel(), selector);
+        return new StarTowerPotentialCase(this, true, selector);
     }
     
     public void setPendingSubNotes(int amount) {

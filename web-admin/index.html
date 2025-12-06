@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>星塔旅人 GM 后台（Web）</title>
   <link rel="stylesheet" href="styles.css" />
+  <script src="config.js"></script>
 </head>
 <body>
   <div class="page">
@@ -23,29 +24,24 @@
     </header>
 
     <main class="layout">
-      <section class="panel wide">
-        <div class="panel-header">
+      <section class="panel wide centered">
+        <div class="panel-header column">
+          <div class="center-text">
           <div>
             <p class="eyebrow">连接设置</p>
-            <h2>服务器 / Token / UID</h2>
+            <h2>服务器配置已预置</h2>
           </div>
-          <button id="btnSaveConfig" class="primary">保存配置</button>
+           <p class="help-text">服务端地址与密钥已写入配置文件，无需在前端填写。</p>
         </div>
-        <div class="form-grid">
-          <label class="field">
-            <span>服务端地址</span>
-            <input id="inputServer" type="text" placeholder="例如：http://127.0.0.1:8080" />
-          </label>
-          <label class="field">
-            <span>远程密钥（Admin Key 或玩家 Token）</span>
-            <input id="inputToken" type="password" placeholder="必填，用于通过 /api/command 调用" />
-          </label>
+       <div class="form-grid single">
           <label class="field">
             <span>目标 UID（可选，用于 @uid 定向）</span>
             <input id="inputUid" type="text" placeholder="例如：100001" />
           </label>
         </div>
-        <p class="help-text">配置会保存在浏览器本地存储，仅在当前设备生效。</p>
+        <div class="actions center-actions">
+          <button id="btnSaveConfig" class="primary">保存 UID</button>
+        </div>
       </section>
 
       <section class="panel">
@@ -92,20 +88,7 @@
           <div class="pill">使用 !mail GM 命令</div>
         </div>
 
-        <div class="mail-grid">
-          <label class="field">
-            <span>邮件标题</span>
-            <input id="mailSubject" type="text" readonly value="欢迎来到大鸟转转转-星塔旅人！" />
-          </label>
-          <label class="field">
-            <span>发送者</span>
-            <input id="mailSender" type="text" readonly value="GM" />
-          </label>
-          <label class="field wide">
-            <span>正文</span>
-            <textarea id="mailBody" rows="2" readonly>欢迎来到大鸟转转转-星塔旅人！QQ交流群：531390126，祝你游戏愉快！</textarea>
-          </label>
-        </div>
+        <p class="help-text center-text">邮件标题、正文与发送者已预设，无需修改。</p>
 
         <div class="attachments">
           <div class="attachments-header">

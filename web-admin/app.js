@@ -1,6 +1,3 @@
-const DEFAULT_MAIL_SUBJECT = '欢迎来到大鸟转转转-星塔旅人！';
-const DEFAULT_MAIL_BODY = '欢迎来到大鸟转转转-星塔旅人！QQ交流群：531390126，祝你游戏愉快！';
-
 const COMMANDS = {
   '玩家管理': [
     {
@@ -330,11 +327,10 @@ async function executeCurrentCommand() {
 }
 
 async function sendCommand(commandText) {
-  const server = document.getElementById('inputServer').value.trim();
-  const token = document.getElementById('inputToken').value.trim();
+  const { server, token } = APP_CONFIG;
 
   if (!server || !token) {
-    pushLog('请先填写服务器地址与远程密钥。', true);
+    pushLog('服务端配置缺失，请检查配置文件。', true);
     return;
   }
 
@@ -348,7 +344,10 @@ async function sendCommand(commandText) {
 
     const text = await res.text();
     if (res.ok) {
-      pushLog(text || '执行成功');
+      alert('发送成功！');
+      if (text) {
+        pushLog(text);
+      }
     } else {
       pushLog(`${res.status} - ${text}`, true);
     }
@@ -379,12 +378,10 @@ async function copyPreview() {
 
 function saveConfig() {
   const config = {
-    server: document.getElementById('inputServer').value.trim(),
-    token: document.getElementById('inputToken').value.trim(),
     uid: document.getElementById('inputUid').value.trim(),
   };
   localStorage.setItem('nebula-web-admin', JSON.stringify(config));
-  pushLog('配置已保存。');
+  pushLog('UID 已保存。');
 }
 
 function loadConfig() {
@@ -392,8 +389,6 @@ function loadConfig() {
   if (!raw) return;
   try {
     const cfg = JSON.parse(raw);
-    document.getElementById('inputServer').value = cfg.server || '';
-    document.getElementById('inputToken').value = cfg.token || '';
     document.getElementById('inputUid').value = cfg.uid || '';
   } catch (e) {
     console.warn('配置读取失败', e);
@@ -474,8 +469,8 @@ function renderAttachments() {
 }
 
 function buildMailCommand() {
-  const subject = document.getElementById('mailSubject').value.trim() || DEFAULT_MAIL_SUBJECT;
-  const body = document.getElementById('mailBody').value.trim() || DEFAULT_MAIL_BODY;
+  const subject = APP_CONFIG.mailSubject;
+  const body = APP_CONFIG.mailBody;
   const attachments = state.attachments.map((a) => `${a.id} x${a.qty}`).join(' ');
   const base = attachments ? `mail "${subject}" "${body}" ${attachments}` : `mail "${subject}" "${body}"`;
   const uid = document.getElementById('inputUid').value.trim();

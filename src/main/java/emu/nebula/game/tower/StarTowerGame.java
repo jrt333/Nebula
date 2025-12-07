@@ -76,6 +76,7 @@ public class StarTowerGame {
     
     private int pendingPotentialCases = 0;
     private int pendingSubNotes = 0;
+    private boolean completed;
     
     // Bag
     private ItemParamMap items;
@@ -807,28 +808,19 @@ public class StarTowerGame {
     }
     
     public StarTowerInteractResp settle(StarTowerInteractResp rsp, boolean isWin) {
+        // Set completed flag
+        this.completed = true;
+        
         // End game
-        this.getManager().endGame(isWin);
+        this.getManager().settleGame(isWin);
         
         // Settle info
         var settle = rsp.getMutableSettle()
                 .setTotalTime(this.getBattleTime())
                 .setBuild(this.getBuild().toProto());
         
-        // Mark change info
+        // Set empty change info
         settle.getMutableChange();
-        
-        // Log victory
-        if (isWin) {
-            // Add star tower history
-            this.getManager().getPlayer().getProgress().addStarTowerLog(this.getId());
-            
-            // Trigger achievement
-            var elementType = this.getTeamElement();
-            if (elementType != null) {
-                this.getAchievementManager().trigger(AchievementCondition.TowerClearSpecificCharacterTypeWithTotal, 1, elementType.getValue(), 0);
-            }
-        }
         
         // Complete
         return rsp;

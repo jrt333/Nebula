@@ -1,6 +1,7 @@
 package emu.nebula.game.tower;
 
 import emu.nebula.GameConstants;
+import emu.nebula.util.Utils;
 import lombok.Getter;
 
 /**
@@ -177,5 +178,28 @@ public class StarTowerModifiers {
 
     public void consumeShopReroll() {
         this.shopRerollCount = Math.max(this.shopRerollCount - 1, 0);
+    }
+
+    /**
+     * Returns the amount of tickets we earn from completing this monolith
+     */
+    public int calculateTickets() {
+        // Get base amount
+        int tickets = 50;
+        
+        // Add tickets based on difficulty
+        tickets += Utils.randomRange(game.getDifficulty() * 50, game.getDifficulty() * 100);
+        
+        // Apply talent modifiers
+        if (this.hasGrowthNode(20403)) {
+            tickets *= 2;   // +100%
+        } else if (this.hasGrowthNode(20102)) {
+            tickets *= 1.6; // +60%
+        } else if (this.hasGrowthNode(10501)) {
+            tickets *= 1.3; // +30%
+        }
+        
+        // Complete
+        return tickets;
     }
 }

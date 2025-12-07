@@ -10,6 +10,7 @@ import emu.nebula.game.player.PlayerManager;
 import emu.nebula.game.player.PlayerProgress;
 import emu.nebula.game.quest.QuestCondition;
 import emu.nebula.proto.StarTowerApply.StarTowerApplyReq;
+import emu.nebula.util.Utils;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
@@ -219,7 +220,7 @@ public class StarTowerManager extends PlayerManager {
         return change.setExtraData(this.game);
     }
 
-    public StarTowerGame endGame(boolean victory) {
+    public StarTowerGame settleGame(boolean victory) {
         // Cache instance
         var game = this.game;
         
@@ -232,27 +233,61 @@ public class StarTowerManager extends PlayerManager {
         
         // Handle victory events
         if (victory) {
-            // Trigger achievements
-            this.getPlayer().trigger(AchievementCondition.TowerClearTotal, 1);
-            this.getPlayer().trigger(
+            // Add star tower history
+            this.getPlayer().getProgress().addStarTowerLog(game.getId());
+            
+            // Achievement conditions
+            var achievements = this.getPlayer().getAchievementManager();
+            
+            achievements.trigger(AchievementCondition.TowerClearTotal, 1);
+            achievements.trigger(
                 AchievementCondition.TowerClearSpecificGroupIdAndDifficulty,
                 1,
                 game.getData().getGroupId(),
                 game.getData().getDifficulty()
             );
-            this.getPlayer().trigger(
+            achievements.trigger(
                 AchievementCondition.TowerClearSpecificLevelWithDifficultyAndTotal,
                 1,
                 game.getData().getId(),
                 game.getData().getDifficulty()
             );
+            
+            var elementType = game.getTeamElement();
+            if (elementType != null) {
+                achievements.trigger(AchievementCondition.TowerClearSpecificCharacterTypeWithTotal, 1, elementType.getValue(), 0);
+            }
         }
+        
+        // Return game
+        return game;
+    }
+    
+    public PlayerChangeInfo addRewards(PlayerChangeInfo change) {
+        // Create change info
+        if (change == null) {
+            change = new PlayerChangeInfo();
+        }
+        
+        // Get game
+        var game = this.getGame();
+        
+        if (game == null || !game.isCompleted()) {
+            return change;
+        }
+        
+        // Add journey tickets
+        this.getPlayer().getInventory().addItem(12, game.getModifiers().calculateTickets(), change);
+        
+        // (Custom) Add research materials since tower quests are not implemented yet
+        int amount = 50 + (Utils.randomRange(game.getDifficulty() - 1, game.getDifficulty() * 2) * 10);
+        this.getPlayer().getInventory().addItem(51, amount, change);
         
         // Clear game instance
         this.game = null;
         
-        // Return game
-        return game;
+        // Return change info
+        return change;
     }
     
     // Build
@@ -277,8 +312,10 @@ public class StarTowerManager extends PlayerManager {
         // Create player change info
         var change = new PlayerChangeInfo();
         
-        // Cache build and clear reference
+        // Cache build
         var build = this.lastBuild;
+        
+        // Clear reference to build
         this.lastBuild = null;
         
         // Check if the player wants this build or not

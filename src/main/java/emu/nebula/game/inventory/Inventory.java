@@ -385,6 +385,8 @@ public class Inventory extends PlayerManager implements GameDatabaseObject {
                 
                 if (disc != null) {
                     change.add(disc.toProto());
+                } else {
+                    amount = 0;
                 }
             }
             case Char -> {
@@ -396,6 +398,8 @@ public class Inventory extends PlayerManager implements GameDatabaseObject {
 
                 if (character != null) {
                     change.add(character.toProto());
+                } else {
+                    amount = 0;
                 }
             }
             case Energy -> {
@@ -466,7 +470,7 @@ public class Inventory extends PlayerManager implements GameDatabaseObject {
         // Trigger quest + achievement
         if (amount > 0) {
             this.getPlayer().trigger(QuestCondition.ItemsAdd, amount, id);
-        } else {
+        } else if (amount < 0) {
             this.getPlayer().trigger(QuestCondition.ItemsDeplete, Math.abs(amount), id);
         }
         

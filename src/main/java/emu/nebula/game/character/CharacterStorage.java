@@ -67,6 +67,11 @@ public class CharacterStorage extends PlayerManager {
             return null;
         }
         
+        // Prevent players from getting unavliable characters
+        if (!data.isAvailable()) {
+            return null;
+        }
+        
         // Create character
         var character = new GameCharacter(this.getPlayer(), data);
         
@@ -131,8 +136,13 @@ public class CharacterStorage extends PlayerManager {
     }
 
     private GameDisc addDisc(DiscDef data) {
-        // Sanity check to make sure we dont have this character already
+        // Sanity check to make sure we dont have this disc already
         if (this.hasDisc(data.getId())) {
+            return null;
+        }
+        
+        // Prevent players from getting unavliable discs
+        if (!data.isAvailable()) {
             return null;
         }
         

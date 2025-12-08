@@ -4,7 +4,6 @@ import emu.nebula.net.NetHandler;
 import emu.nebula.net.NetMsgId;
 import emu.nebula.proto.ActivityTowerDefenseLevelSettle.ActivityTowerDefenseLevelSettleReq;
 import emu.nebula.net.HandlerId;
-import emu.nebula.Nebula;
 import emu.nebula.game.activity.type.TowerDefenseActivity;
 import emu.nebula.net.GameSession;
 
@@ -20,7 +19,7 @@ public class HandlerActivityTowerDefenseLevelSettleReq extends NetHandler {
         var activity = session.getPlayer().getActivityManager().getActivity(TowerDefenseActivity.class, 102001);
 
         // Claim rewards
-        var change = activity.claimReward((int)req.getLevelId());
+        var change = activity.claimReward(req.getLevelId());
 
         // Update completed stages
         activity.getCompletedStages().put(req.getLevelId(), req.getStar());

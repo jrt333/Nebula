@@ -12,6 +12,7 @@ import emu.nebula.game.quest.QuestCondition;
 import emu.nebula.proto.StarTowerApply.StarTowerApplyReq;
 import emu.nebula.util.Utils;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 
@@ -32,6 +33,10 @@ public class StarTowerManager extends PlayerManager {
     
     public PlayerProgress getProgress() {
         return this.getPlayer().getProgress();
+    }
+    
+    public IntSet getStarTowerLog() {
+        return this.getProgress().getStarTowerLog();
     }
     
     // Growth nodes (talents/research)
@@ -241,22 +246,19 @@ public class StarTowerManager extends PlayerManager {
             
             achievements.trigger(AchievementCondition.TowerClearTotal, 1);
             achievements.trigger(
-                AchievementCondition.TowerClearSpecificGroupIdAndDifficulty,
-                1,
-                game.getData().getGroupId(),
-                game.getData().getDifficulty()
-            );
-            achievements.trigger(
                 AchievementCondition.TowerClearSpecificLevelWithDifficultyAndTotal,
                 1,
                 game.getData().getId(),
-                game.getData().getDifficulty()
+                0
             );
             
             var elementType = game.getTeamElement();
             if (elementType != null) {
                 achievements.trigger(AchievementCondition.TowerClearSpecificCharacterTypeWithTotal, 1, elementType.getValue(), 0);
             }
+            
+            // Update tower group achievements
+            this.updateTowerGroupAchievements(game);
         }
         
         // Return game
@@ -288,6 +290,35 @@ public class StarTowerManager extends PlayerManager {
         
         // Return change info
         return change;
+    }
+    
+    // Achievements
+    
+    private void updateTowerGroupAchievements(StarTowerGame game) {
+        // Update "First Ascension" achievement
+        boolean firstAscension = this.getStarTowerLog().contains(401) && this.getStarTowerLog().size() >= 2;
+        if (firstAscension) {
+            this.getPlayer().getAchievementManager().triggerOne(498, 1, 0, 1);
+        }
+        
+        // Get total clears on this difficulty
+        int diff = game.getDifficulty();
+        int totalDiffClears = 0;
+        
+        for (int i = 1; i <= 3; i++) {
+            int towerId = (i * 100) + 1 + diff;
+            if (this.getStarTowerLog().contains(towerId)) {
+                totalDiffClears++;
+            }
+        }
+        
+        // Update "Monolith Conqueror" achievements
+        this.getPlayer().getAchievementManager().trigger(
+            AchievementCondition.TowerClearSpecificGroupIdAndDifficulty,
+            totalDiffClears,
+            diff,
+            0
+        );
     }
     
     // Build

@@ -53,10 +53,44 @@ public class AchievementHelper {
     }
     
     private static void fixParams() {
-        // Star Tower TODO
-        addParam(78, 0, 2);
-        addParam(79, 0, 4);
+        // Clear "Misstep On One"
+        addParam(56, 401, 0); // Custom trigger
+        
+        // Clear "Currents and Shadows"
+        addParam(57, 102, 0);
+        addParam(58, 103, 0);
+        addParam(59, 104, 0);
+        addParam(60, 105, 0);
+        addParam(61, 106, 0);
+        addParam(62, 107, 0);
+        addParam(63, 108, 0);
+        
+        // Clear "Dust and Flames"
+        addParam(64, 202, 0);
+        addParam(65, 203, 0);
+        addParam(66, 204, 0);
+        addParam(67, 205, 0);
+        addParam(68, 206, 0);
+        addParam(69, 207, 0);
+        addParam(70, 208, 0);
+        
+        // Clear "Storm and Thunder"
+        addParam(71, 302, 0);
+        addParam(72, 303, 0);
+        addParam(73, 304, 0);
+        addParam(74, 305, 0);
+        addParam(75, 306, 0);
+        addParam(76, 307, 0);
+        addParam(77, 308, 0);
+        
+        // First Ascension
         addParam(498, 0, 1);
+        
+        // Monolith Conqueror
+        addParam(78, 2, 0);
+        addParam(79, 4, 0);
+        addParam(80, 6, 0);
+        addParam(81, 7, 0);
         
         // Money
         addParam(25, GameConstants.GOLD_ITEM_ID, 0);

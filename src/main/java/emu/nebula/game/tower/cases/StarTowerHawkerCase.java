@@ -209,8 +209,12 @@ public class StarTowerHawkerCase extends StarTowerBaseCase {
         // Remove coins
         this.getGame().addItem(GameConstants.TOWER_COIN_ITEM_ID, -price, change);
         
-        // Achievement
+        // Achievements
         this.getGame().getAchievementManager().trigger(AchievementCondition.TowerSpecificDifficultyShopBuyTimes, 1);
+        
+        if (goods.hasDiscount()) {
+            this.getGame().getAchievementManager().trigger(AchievementCondition.TowerSpecificShopBuyDiscountTotal, 1);
+        }
         
         // Set change info
         rsp.setChange(change.toProto());

@@ -1,26 +1,25 @@
 package emu.nebula.game.activity.type;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
 import dev.morphia.annotations.Entity;
+
 import emu.nebula.data.GameData;
 import emu.nebula.data.resources.ActivityDef;
 import emu.nebula.game.activity.ActivityManager;
 import emu.nebula.game.activity.GameActivity;
-import emu.nebula.game.inventory.ItemParamMap;
 import emu.nebula.game.player.PlayerChangeInfo;
 import emu.nebula.proto.ActivityDetail.ActivityMsg;
 import emu.nebula.proto.Public.ActivityQuest;
 import emu.nebula.proto.Public.ActivityTowerDefenseLevel;
+
+import it.unimi.dsi.fastutil.ints.Int2IntMap;
+import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import lombok.Getter;
 
 @Getter
 @Entity
 public class TowerDefenseActivity extends GameActivity {
-    private Map<Integer, Integer> completedStages;
-    private Map<Integer, Integer> completedQuests;
+    private Int2IntMap completedStages;
+    private Int2IntMap completedQuests;
     
     @Deprecated // Morphia only
     public TowerDefenseActivity() {
@@ -29,19 +28,16 @@ public class TowerDefenseActivity extends GameActivity {
     
     public TowerDefenseActivity(ActivityManager manager, ActivityDef data) {
         super(manager, data);
-        this.completedStages = new HashMap<Integer, Integer>();
-        this.completedQuests = new HashMap<Integer, Integer>();
+        this.completedStages = new Int2IntOpenHashMap();
+        this.completedQuests = new Int2IntOpenHashMap();
     }
 
     public PlayerChangeInfo claimReward(int level) {
-        // Initialize change info
-        var change = new PlayerChangeInfo();
-
         // Get rewards
         var rewards = GameData.getTowerDefenseLevelDataTable().get(level).getRewards();
 
         // Add rewards
-        return getPlayer().getInventory().addItems(rewards, change);
+        return getPlayer().getInventory().addItems(rewards);
     }
     
     // public PlayerChangeInfo claimReward(int groupId) {

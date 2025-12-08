@@ -27,7 +27,7 @@ public class ScoreBossManager extends PlayerManager  {
         return GameData.getScoreBossControlDataTable().get(this.getControlId());
     }
     
-    public ScoreBossRankEntry getRanking() {
+    public ScoreBossRankEntry getRankEntry() {
         if (this.ranking == null && !this.checkedDatabase) {
             this.ranking = Nebula.getGameDatabase().getObjectByUid(ScoreBossRankEntry.class, this.getPlayerUid());
             this.checkedDatabase = true;
@@ -57,7 +57,7 @@ public class ScoreBossManager extends PlayerManager  {
         return true;
     }
 
-    public boolean settle(int stars, int score) {
+    public boolean settle(int stars, int score, int skillScore) {
         // Get level
         var control = getControlData();
         if (control == null || !control.getLevelGroup().contains(this.getLevelId())) {
@@ -71,7 +71,7 @@ public class ScoreBossManager extends PlayerManager  {
         }
         
         // Get ranking from database
-        this.getRanking();
+        this.getRankEntry();
         
         // Create ranking if its not in the database
         if (this.ranking == null) {
@@ -79,7 +79,7 @@ public class ScoreBossManager extends PlayerManager  {
         }
         
         // Settle
-        this.ranking.settle(this.getPlayer(), build, getControlId(), getLevelId(), stars, score);
+        this.ranking.settle(this.getPlayer(), build, getControlId(), getLevelId(), stars, score, skillScore);
         
         // Save ranking
         this.ranking.save();

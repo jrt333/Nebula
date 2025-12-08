@@ -33,6 +33,8 @@ public class ScoreBossRankEntry implements GameDatabaseObject {
     private int titleSuffix;
     private int[] honor;
     private int score;
+    @SuppressWarnings("unused")
+    private int stars;
     
     private int controlId;
     private Map<Integer, ScoreBossTeamEntry> teams;
@@ -51,6 +53,17 @@ public class ScoreBossRankEntry implements GameDatabaseObject {
         this.teams = new HashMap<>();
     }
     
+    // TODO replace later
+    public int getStars() {
+        int stars = 0;
+        
+        for (var team : this.getTeams().values()) {
+            stars += team.getStars();
+        }
+        
+        return stars;
+    }
+    
     public void update(Player player) {
         this.name = player.getName();
         this.level = player.getLevel();
@@ -60,26 +73,36 @@ public class ScoreBossRankEntry implements GameDatabaseObject {
         this.honor = player.getHonor();
     }
     
-    public void settle(Player player, StarTowerBuild build, int controlId, int level, int stars, int score) {
+    public void settle(Player player, StarTowerBuild build, int controlId, int level, int stars, int score, int skillScore) {
         // Update player data
         this.update(player);
         
         // Reset score entry if control id doesn't match
         if (this.controlId != controlId) {
             this.controlId = controlId;
-            this.getTeams().clear();
+            this.reset();
         }
         
         // Set team entry
-        var team = new ScoreBossTeamEntry(player, build, stars, score);
+        var team = new ScoreBossTeamEntry(player, build, stars, score, skillScore);
+        
+        // Put in team map
         this.getTeams().put(level, team);
         
-        // Calculate score
+        // Calculate score/stars
         this.score = 0;
+        this.stars = 0;
         
         for (var t : this.getTeams().values()) {
             this.score += t.getLevelScore();
+            this.stars += t.getStars();
         }
+    }
+    
+    private void reset() {
+        this.score = 0;
+        this.stars = 0;
+        this.getTeams().clear();
     }
     
     // Proto
@@ -115,6 +138,7 @@ public class ScoreBossRankEntry implements GameDatabaseObject {
         private int buildScore;
         private int stars;
         private int levelScore;
+        private int skillScore;
         private List<ScoreBossCharEntry> characters;
         
         @Deprecated // Morphia only
@@ -122,11 +146,12 @@ public class ScoreBossRankEntry implements GameDatabaseObject {
             
         }
         
-        public ScoreBossTeamEntry(Player player, StarTowerBuild build, int stars, int score) {
+        public ScoreBossTeamEntry(Player player, StarTowerBuild build, int stars, int score, int skillScore) {
             this.buildId = build.getUid();
             this.buildScore = build.getScore();
             this.stars = stars;
             this.levelScore = score;
+            this.skillScore = skillScore;
             this.characters = new ArrayList<>();
             
             for (var charId : build.getCharIds()) {

@@ -42,8 +42,8 @@ public class StarTowerHawkerCase extends StarTowerBaseCase {
         // Caclulate amount of potentials/sub notes to sell
         int total = getModifiers().getShopGoodsCount();
         
-        int minPotentials = Math.max(total / 2, 2);
-        int maxPotentials = Math.max(total - 1, minPotentials);
+        int minPotentials = Math.max(total / 2, 2);             // At least half of the shop goods should be potential drinks
+        int maxPotentials = Math.max(total - 1, minPotentials); // Make sure we have at least melodic note goods IF we have more than 2 shop goods
         int potentials = Utils.randomRange(minPotentials, maxPotentials);
         
         int subNotes = total - potentials;

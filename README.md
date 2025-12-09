@@ -19,7 +19,7 @@ For any extra support, questions, or discussions, check out our [Discord](https:
 - Commissions
 - Heartlink
 - Achievements
-- Monoliths (some research nodes not working/research quests not implemented)
+- Monoliths (research quests not implemented)
 - Bounty Trials
 - Menance Arena
 - Proving Grounds

@@ -155,4 +155,16 @@ public class GameData {
     // Activity: Trials
     @Getter private static DataTable<TrialControlDef> TrialControlDataTable = new DataTable<>();
     @Getter private static DataTable<TrialGroupDef> TrialGroupDataTable = new DataTable<>();
+    
+    // Activity: Levels
+    @Getter private static DataTable<ActivityLevelsLevelDef> ActivityLevelsLevelDataTable = new DataTable<>();
+    
+    // Activity: Task
+    @Getter private static DataTable<ActivityTaskDef> ActivityTaskDataTable = new DataTable<>();
+    @Getter private static DataTable<ActivityTaskGroupDef> ActivityTaskGroupDataTable = new DataTable<>();
+    
+    // Activity: Shop
+    @Getter private static DataTable<ActivityShopDef> ActivityShopDataTable = new DataTable<>();
+    @Getter private static DataTable<ActivityShopControlDef> ActivityShopControlDataTable = new DataTable<>();
+    @Getter private static DataTable<ActivityGoodsDef> ActivityGoodsDataTable = new DataTable<>();
 }

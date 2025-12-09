@@ -39,6 +39,21 @@ public class StarTowerModifiers {
     private int potentialRerollCount;
     private int potentialRerollDiscount;
     
+    // Sub notes
+    private double battleSubNoteDropChance;
+    
+    private double bonusSubNoteChance;
+    private int bonusSubNotes;      // Each sub note drop = 3 musical notes
+    
+    private int bonusBossSubNotes;  // Each sub note drop = 3 musical notes
+    
+    // Coin
+    private double bonusCoinChance;
+    private int bonusCoinCount;
+    
+    // Random npc event
+    private double battleNpcEventChance;
+    
     public StarTowerModifiers(StarTowerGame game) {
         this.game = game;
         
@@ -125,6 +140,59 @@ public class StarTowerModifiers {
             this.potentialRerollDiscount = 40;
         } else if (this.hasGrowthNode(30101)) {
             this.potentialRerollDiscount = 30;
+        }
+        
+        // Sub note drop chance (Harmonic Heartstring)
+        this.battleSubNoteDropChance = 1.0;
+        
+        if (game.getDifficulty() >= 4 && this.hasGrowthNode(20401)) {
+            this.battleSubNoteDropChance += 0.6;
+        } else if (game.getDifficulty() >= 3 && this.hasGrowthNode(20101)) {
+            this.battleSubNoteDropChance += 0.45;
+        } else if (game.getDifficulty() >= 2 && this.hasGrowthNode(10401)) {
+            this.battleSubNoteDropChance += 0.3;
+        } else if (this.hasGrowthNode(10101)) {
+            this.battleSubNoteDropChance += 0.15;
+        }
+        
+        // Bonus sub note chance (Note of Surprise)
+        if (game.getDifficulty() >= 6 && this.hasGrowthNode(30501)) {
+            this.bonusSubNoteChance = .2;
+            this.bonusSubNotes = 2; 
+        } else if (game.getDifficulty() >= 4 && this.hasGrowthNode(20501)) {
+            this.bonusSubNoteChance = .1;
+            this.bonusSubNotes = 2;
+        } else if (game.getDifficulty() >= 3 && this.hasGrowthNode(20201)) {
+            this.bonusSubNoteChance = .1;
+            this.bonusSubNotes = 1;
+        }
+        
+        // Bonus boss sub notes drop (Luck Note)
+        if (game.getDifficulty() >= 7 && this.hasGrowthNode(30701)) {
+            this.bonusBossSubNotes = 3;
+        } else if (game.getDifficulty() >= 5 && this.hasGrowthNode(20701)) {
+            this.bonusBossSubNotes = 2;
+        } else if (game.getDifficulty() >= 3 && this.hasGrowthNode(10701)) {
+            this.bonusBossSubNotes = 1;
+        }
+        
+        // Bonus coin chance (Scratch Card)
+        if (game.getDifficulty() >= 3 && this.hasGrowthNode(10802)) {
+            this.bonusCoinChance = 0.5;
+            this.bonusCoinCount = 30;
+        } else if (game.getDifficulty() >= 2 && this.hasGrowthNode(10503)) {
+            this.bonusCoinChance = 0.3;
+            this.bonusCoinCount = 30;
+        } else if (this.hasGrowthNode(10203)) {
+            this.bonusCoinChance = 0.1;
+            this.bonusCoinCount = 10;
+        }
+        
+        // Battle npc event chance (Destiny's Choice)
+        if (game.getDifficulty() >= 4 && this.hasGrowthNode(20503)) {
+            this.battleNpcEventChance = 0.3;
+        } else if (game.getDifficulty() >= 3 && this.hasGrowthNode(10901)) {
+            this.battleNpcEventChance = 0.2;
         }
     }
     

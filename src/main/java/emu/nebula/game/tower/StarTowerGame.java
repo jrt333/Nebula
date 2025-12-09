@@ -75,7 +75,6 @@ public class StarTowerGame {
     private int[] discIds;
 
     private int pendingPotentialCases = 0;
-    private int pendingSubNotes = 0;
     private boolean completed;
     
     // Bag
@@ -106,11 +105,7 @@ public class StarTowerGame {
 
         // Set tower id
         this.id = req.getId();
-
-        // Setup room
-        this.enterNextRoom();
-        this.getRoom().setMapInfo(req);
-
+        
         // Setup team
         this.formationId = req.getFormationId();
         this.buildId = Snowflake.newUid();
@@ -182,7 +177,11 @@ public class StarTowerGame {
         for (int id : GameConstants.TOWER_COMMON_SUB_NOTE_SKILLS) {
             this.subNoteDropList.add(id);
         }
-
+        
+        // Enter first room
+        this.enterNextRoom();
+        this.getRoom().setMapInfo(req);
+        
         // Add starting items
         this.getModifiers().addStartingItems();
     }
@@ -298,21 +297,26 @@ public class StarTowerGame {
         }
 
         // Create room
-        int roomType = stage.getRoomType();
-
-        if (roomType <= RoomType.FinalBossRoom.getValue()) {
+        var roomType = stage.getRoomType();
+        
+        if (roomType.getValue() <= RoomType.FinalBossRoom.getValue()) {
             this.room = new StarTowerBattleRoom(this, stage);
-        } else if (roomType == RoomType.EventRoom.getValue()) {
+        } else if (roomType == RoomType.EventRoom) {
             this.room = new StarTowerEventRoom(this, stage);
-        } else if (roomType == RoomType.ShopRoom.getValue()) {
+        } else if (roomType == RoomType.ShopRoom) {
             this.room = new StarTowerHawkerRoom(this, stage);
         } else {
             this.room = new StarTowerBaseRoom(this, stage);
         }
 
         // Trigger achievement
-        this.getAchievementManager().trigger(AchievementCondition.TowerEnterRoom, 1, stage.getRoomType() + 1, 0);
-
+        this.getAchievementManager().trigger(
+            AchievementCondition.TowerEnterRoom,
+            1,
+            stage.getRoomType().getValue() + 1,
+            0
+        );
+        
         // Create cases for the room
         this.room.onEnter();
     }
@@ -514,7 +518,7 @@ public class StarTowerGame {
         cases.add(this.createExit());
 
         // Create shop npc if this is the last room
-        if (this.isOnFinalFloor()) {
+        if (this.getRoom().getType() == RoomType.FinalBossRoom) {
             // Create hawker case (shop)
             cases.add(new StarTowerHawkerCase());
             // Create strengthen machine
@@ -522,8 +526,13 @@ public class StarTowerGame {
                 cases.add(new StarTowerStrengthenMachineCase());
             }
         } else if (this.getRoom() instanceof StarTowerBattleRoom) {
-            // Create recovery npc
-            cases.add(new StarTowerNpcRecoveryHPCase());
+            if (this.getRoom().getType() == RoomType.BattleRoom && Utils.randomChance(this.getModifiers().getBattleNpcEventChance())) {
+                // Create npc event
+                cases.add(this.getRoom().createNpcEvent());
+            } else {
+                // Create recovery npc
+                cases.add(new StarTowerNpcRecoveryHPCase());
+            }
         }
 
         // Complete
@@ -699,21 +708,16 @@ public class StarTowerGame {
         // Creator potential selector case
         return new StarTowerPotentialCase(this, true, selector);
     }
-
-    public void setPendingSubNotes(int amount) {
-        this.pendingSubNotes = amount;
-    }
-
+    
     public int getRandomSubNoteId() {
         return Utils.randomElement(this.getSubNoteDropList());
     }
 
     private PlayerChangeInfo addRandomSubNoteSkills(PlayerChangeInfo change) {
-        int id = this.getRandomSubNoteId();
-        int count = Utils.randomRange(1, 3);
-
-        this.addItem(id, count, change);
-
+        // Add sub note with random id
+        this.addItem(this.getRandomSubNoteId(), 3, change);
+        
+        // Complete
         return change;
     }
 

@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 import it.unimi.dsi.fastutil.ints.*;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-
+import emu.nebula.data.custom.CharGemAttrGroupDef;
 import emu.nebula.data.resources.*;
 
 import lombok.Getter;

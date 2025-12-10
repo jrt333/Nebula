@@ -21,6 +21,10 @@ public class StarTowerBattleCase extends StarTowerBaseCase {
         return CaseType.Battle;
     }
     
+    public RoomType getRoomType() {
+        return this.getRoom().getType();
+    }
+    
     @Override
     public void onRegister() {
         // Get relevant floor exp data
@@ -70,7 +74,28 @@ public class StarTowerBattleCase extends StarTowerBaseCase {
         if (proto.hasVictory()) {
             // Level up
             this.getGame().addExp(this.expReward);
-            this.getGame().addPotentialSelectors(this.getGame().levelUp());
+            int picks = this.getGame().levelUp();
+            
+            // Handle potential picks
+            if (picks > 0) {
+                // Check special cases
+                if (this.getGame().getFloorCount() == 1) {
+                    // First floor potential selector is always special
+                    this.getGame().addRarePotentialSelectors(1);
+                    picks--;
+                } else if (this.getRoomType() == RoomType.BossRoom || this.getRoomType() == RoomType.FinalBossRoom) {
+                    // First selector after a boss fight is also rare
+                    this.getGame().addRarePotentialSelectors(1);
+                    picks--;
+                } else if (Utils.randomChance(0.125D)) {
+                    // Random 1/8th chance for a rare potential
+                    this.getGame().addRarePotentialSelectors(1);
+                    picks--;
+                }
+            }
+            
+            // Add remaining picks
+            this.getGame().addPotentialSelectors(picks);
             
             // Add clear time
             this.getGame().addBattleTime(proto.getVictory().getTime());

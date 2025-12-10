@@ -72,9 +72,9 @@ public class StarTowerModifiers {
         
         // Bonus max level
         if (this.hasGrowthNode(30301)) {
-            this.bonusMaxPotentialLevel = 6;
+            this.bonusMaxPotentialLevel = 3; // 6 total
         } else if (this.hasGrowthNode(20601)) {
-            this.bonusMaxPotentialLevel = 4;
+            this.bonusMaxPotentialLevel = 1; // 4 total
         }
         
         // Shop extra goods (Monolith Premium)

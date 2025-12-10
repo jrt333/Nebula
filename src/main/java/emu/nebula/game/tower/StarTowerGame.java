@@ -856,12 +856,12 @@ public class StarTowerGame {
         return rsp;
     }
     
-    public StarTowerInteractResp settle(StarTowerInteractResp rsp, boolean isWin) {
+    public StarTowerInteractResp settle(StarTowerInteractResp rsp, boolean victory) {
         // Set completed flag
         this.completed = true;
         
         // End game
-        this.getManager().settleGame(isWin);
+        this.getManager().settleGame(victory);
         
         // Settle info
         var settle = rsp.getMutableSettle()
@@ -870,6 +870,30 @@ public class StarTowerGame {
         
         // Set empty change info
         settle.getMutableChange();
+        
+        // Calculate rewards
+        if (victory) {
+            // Init rewards
+            var rewards = new ItemParamMap();
+            
+            // Add journey tickets
+            int tickets = this.getModifiers().calculateTickets();
+            rewards.add(12, tickets);
+            
+            // (Custom) Add research materials since tower quests are not implemented yet
+            int research = 50 + (Utils.randomRange(this.getDifficulty() - 1, this.getDifficulty() * 2) * 10);
+            rewards.add(51, research);
+            
+            // Add to inventory
+            var change = this.getPlayer().getInventory().addItem(51, research);
+            
+            // Set proto data
+            settle.setChange(change.toProto());
+            rewards.toItemTemplateStream().forEach(settle::addTowerRewards);
+            
+            // Save tower tickets
+            this.getPlayer().getProgress().addWeeklyTowerTicketLog(tickets);
+        }
         
         // Complete
         return rsp;

@@ -686,6 +686,9 @@ public class Player implements GameDatabaseObject {
             if (entries < 3) {
                 this.getInventory().addItem(GameConstants.WEEKLY_ENTRY_ITEM_ID, 3 - entries);
             }
+            
+            // Reset weekly tower tickets
+            this.getProgress().clearWeeklyTowerTicketLog();
         }
         
         // Check if we need to reset monthly
@@ -819,6 +822,7 @@ public class Player implements GameDatabaseObject {
         PlayerInfo proto = PlayerInfo.newInstance()
                 .setServerTs(Nebula.getCurrentTime())
                 .setSigninIndex(this.getSignInIndex())
+                .setTowerTicket(this.getProgress().getTowerTickets())
                 .setDailyShopRewardStatus(this.getQuestManager().hasDailyReward())
                 .setAchievements(new byte[64]);
         

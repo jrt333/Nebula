@@ -74,10 +74,10 @@ public class GameConstants {
     public static final WeightedList<ItemParam> DAILY_GIFTS = new WeightedList<>();
     
     static {
-        DAILY_GIFTS.add(1000, new ItemParam(GOLD_ITEM_ID, 8888));
-        DAILY_GIFTS.add(250, new ItemParam(GOLD_ITEM_ID, 18888));
-        DAILY_GIFTS.add(250, new ItemParam(33001, 10));
-        DAILY_GIFTS.add(10, new ItemParam(GEM_ITEM_ID, 50));
+        DAILY_GIFTS.add(1000, new ItemParam(GOLD_ITEM_ID, 888888));
+        DAILY_GIFTS.add(250, new ItemParam(GOLD_ITEM_ID, 888888));
+        DAILY_GIFTS.add(250, new ItemParam(33001, 1000));
+        DAILY_GIFTS.add(10, new ItemParam(GEM_ITEM_ID, 5000));
     }
     
     // Helper functions

@@ -633,13 +633,7 @@ public class Player implements GameDatabaseObject {
         
         // Trigger quest/achievement login
         this.trigger(QuestCondition.LoginTotal, 1);
-        
-        // Add weekly boss entry item
-        int entries = this.getInventory().getResourceCount(GameConstants.WEEKLY_ENTRY_ITEM_ID);
-        if (entries < 3) {
-            this.getInventory().addItem(GameConstants.WEEKLY_ENTRY_ITEM_ID, 3 - entries);
-        }
-        
+
         // Give sign-in rewards
         this.getSignInRewards(hasMonthChanged);
         
@@ -685,8 +679,21 @@ public class Player implements GameDatabaseObject {
         this.getQuestManager().resetDailyQuests();
         this.getBattlePassManager().getBattlePass().resetDailyQuests(resetWeekly);
         
-        // Reset monthly shop purchases
+        // Check to reset weeklies
+        if (resetWeekly) {
+            // Add weekly boss entry item
+            int entries = this.getInventory().getResourceCount(GameConstants.WEEKLY_ENTRY_ITEM_ID);
+            if (entries < 3) {
+                this.getInventory().addItem(GameConstants.WEEKLY_ENTRY_ITEM_ID, 3 - entries);
+            }
+            
+            // Reset weekly tower tickets
+            this.getProgress().clearWeeklyTowerTicketLog();
+        }
+        
+        // Check if we need to reset monthly
         if (resetMonthly) {
+            // Reset monthly shop purchases
             this.getInventory().resetShopPurchases();
         }
     }
@@ -815,6 +822,7 @@ public class Player implements GameDatabaseObject {
         PlayerInfo proto = PlayerInfo.newInstance()
                 .setServerTs(Nebula.getCurrentTime())
                 .setSigninIndex(this.getSignInIndex())
+                .setTowerTicket(this.getProgress().getTowerTickets())
                 .setDailyShopRewardStatus(this.getQuestManager().hasDailyReward())
                 .setAchievements(new byte[64]);
         

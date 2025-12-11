@@ -10,7 +10,7 @@ import emu.nebula.game.player.PlayerManager;
 import emu.nebula.game.player.PlayerProgress;
 import emu.nebula.game.quest.QuestCondition;
 import emu.nebula.proto.StarTowerApply.StarTowerApplyReq;
-import emu.nebula.util.Utils;
+
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
@@ -233,6 +233,9 @@ public class StarTowerManager extends PlayerManager {
             return null;
         }
         
+        // Clear game
+        this.game = null;
+        
         // Set last build
         this.lastBuild = game.getBuild();
         
@@ -263,33 +266,6 @@ public class StarTowerManager extends PlayerManager {
         
         // Return game
         return game;
-    }
-    
-    public PlayerChangeInfo addRewards(PlayerChangeInfo change) {
-        // Create change info
-        if (change == null) {
-            change = new PlayerChangeInfo();
-        }
-        
-        // Get game
-        var game = this.getGame();
-        
-        if (game == null || !game.isCompleted()) {
-            return change;
-        }
-        
-        // Add journey tickets
-        this.getPlayer().getInventory().addItem(12, game.getModifiers().calculateTickets(), change);
-        
-        // (Custom) Add research materials since tower quests are not implemented yet
-        int amount = 50 + (Utils.randomRange(game.getDifficulty() - 1, game.getDifficulty() * 2) * 10);
-        this.getPlayer().getInventory().addItem(51, amount, change);
-        
-        // Clear game instance
-        this.game = null;
-        
-        // Return change info
-        return change;
     }
     
     // Achievements
@@ -327,8 +303,15 @@ public class StarTowerManager extends PlayerManager {
         // Calculate quanity of tickets from record score
         int count = (int) Math.floor(build.getScore() / 100);
         
+        // Check weekly tickets
+        int maxAmount = this.getPlayer().getProgress().getMaxEarnableWeeklyTowerTickets();
+        count = Math.min(maxAmount, count);
+        
         // Add journey tickets
         this.getPlayer().getInventory().addItem(12, count, change);
+        
+        // Add to weekly ticket log
+        this.getPlayer().getProgress().addWeeklyTowerTicketLog(count);
         
         // Success
         return change;

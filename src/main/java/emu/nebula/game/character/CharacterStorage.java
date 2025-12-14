@@ -275,7 +275,8 @@ public class CharacterStorage extends PlayerManager {
             this.updateCharHandbook = false;
             this.getPlayer().addNextPackage(
                 NetMsgId.handbook_change_notify,
-                this.getPlayer().getCharacters().getCharacterHandbook());
+                this.getCharacterHandbook()
+            );
         }
         
         // Check if we need to trigger disc achievements
@@ -298,7 +299,8 @@ public class CharacterStorage extends PlayerManager {
             this.updateDiscHandbook = false;
             this.getPlayer().addNextPackage(
                 NetMsgId.handbook_change_notify,
-                this.getPlayer().getCharacters().getDiscHandbook());
+                this.getDiscHandbook()
+            );
         }
     }
     

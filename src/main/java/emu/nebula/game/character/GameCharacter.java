@@ -33,6 +33,7 @@ import emu.nebula.proto.Public.CharGemSlot;
 import emu.nebula.proto.Public.UI32;
 import emu.nebula.proto.PublicStarTower.StarTowerChar;
 import emu.nebula.proto.PublicStarTower.StarTowerCharGem;
+import emu.nebula.server.error.ServerException;
 import emu.nebula.util.Bitset;
 import emu.nebula.util.CustomIntArray;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
@@ -660,30 +661,34 @@ public class GameCharacter implements GameDatabaseObject {
         return true;
     }
 
-    public synchronized PlayerChangeInfo generateGem(int slotId) {
+    public synchronized PlayerChangeInfo generateGem(int slotId) throws ServerException {
         // Get gem slot
         var slot = this.getGemSlot(slotId);
         if (slot == null) {
-            return null;
+            throw new ServerException(110105, "Emblem slot doesn't exist");
         }
         
         // Skip if slot is full
         if (slot.isFull()) {
-            return null;
+            throw new ServerException(110105, "Emblem slots are full");
         }
         
         // Get gem data
         var gemData = this.getData().getCharGemData(slotId);
-        var gemControl = gemData.getControlData();
+        var gemControl = GameData.getCharGemSlotControlDataTable().get(slotId);
+        
+        if (gemControl == null) {
+            throw new ServerException(110105, "Emblem slot data doesn't exist");
+        }
         
         // Check character level
         if (this.getLevel() < gemControl.getUnlockLevel()) {
-            return null;
+            throw new ServerException(110105, "Trekker needs to be at least level " + gemControl.getUnlockLevel());
         }
         
         // Make sure the player has the materials to craft the emblem
         if (!getPlayer().getInventory().hasItem(gemData.getGenerateCostTid(), gemControl.getGeneratenCostQty())) {
-            return null;
+            throw new ServerException(119903);
         }
         
         // Generate attributes and create gem
@@ -707,23 +712,29 @@ public class GameCharacter implements GameDatabaseObject {
     }
     
     @SuppressWarnings("deprecation")
-    public synchronized PlayerChangeInfo refreshGem(int slotId, int gemIndex, RepeatedInt lockedAttributes) {
+    public synchronized PlayerChangeInfo refreshGem(int slotId, int gemIndex, RepeatedInt lockedAttributes) throws ServerException {
         // Get gem from slot
         var gem = this.getGemFromSlot(slotId, gemIndex);
-        if (gem == null) return null;
+        if (gem == null) {
+            throw new ServerException(111609);
+        }
         
         // Get gem data
         var gemData = this.getData().getCharGemData(slotId);
-        var gemControl = gemData.getControlData();
+        var gemControl = GameData.getCharGemSlotControlDataTable().get(slotId);
+        
+        if (gemControl == null) {
+            throw new ServerException(110105, "Emblem slot data doesn't exist");
+        }
         
         // Check character level
         if (this.getLevel() < gemControl.getUnlockLevel()) {
-            return null;
+            throw new ServerException(110105, "Trekker needs to be at least level " + gemControl.getUnlockLevel());
         }
         
         // Get locked attributes
         if (lockedAttributes.length() > gemControl.getLockableNum()) {
-            return null;
+            throw new ServerException(110105, "You can only lock up to " + gemControl.getLockableNum() + " attributes");
         }
         
         // Calculate the materials we need

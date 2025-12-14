@@ -6,18 +6,21 @@ import emu.nebula.game.achievement.AchievementCondition;
 import emu.nebula.game.player.Player;
 import emu.nebula.game.player.PlayerChangeInfo;
 import emu.nebula.game.player.PlayerManager;
-
+import emu.nebula.game.player.PlayerProgress;
 import lombok.Getter;
 
 @Getter
 public class InfinityTowerManager extends PlayerManager {
     private InfinityTowerLevelDef levelData;
     private int levelId;
-    
     private long buildId;
     
     public InfinityTowerManager(Player player) {
         super(player);
+    }
+
+    private PlayerProgress getProgress() {
+        return this.getPlayer().getProgress();
     }
     
     public int getBountyLevel() {
@@ -60,7 +63,8 @@ public class InfinityTowerManager extends PlayerManager {
         }
         
         // Check logs if the player has completed the level already
-        if (this.getPlayer().getProgress().getInfinityArenaLog().containsKey(this.getLevelId())) {
+        int highestLevel = this.getProgress().getInfinityTowerLog().get(this.getLevelData().getTowerId());
+        if (highestLevel >= this.getLevelId()) {
             return change;
         }
         
@@ -74,10 +78,14 @@ public class InfinityTowerManager extends PlayerManager {
         change.setExtraData(rewards);
         
         // Log in player progress
-        this.getPlayer().getProgress().addInfinityArenaLog(this.getLevelId());
+        this.getPlayer().getProgress().addInfinityTowerLog(this.getLevelData());
         
         // Trigger achievement
         this.getPlayer().trigger(AchievementCondition.InfinityTowerClearSpecificFloor, 10, this.getLevelId(), 0);
+        
+        // Clear instance
+        this.levelId = 0;
+        this.buildId = 0;
         
         // Success
         return change.setSuccess(true);

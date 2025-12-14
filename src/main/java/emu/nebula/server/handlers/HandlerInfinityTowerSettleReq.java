@@ -16,8 +16,13 @@ public class HandlerInfinityTowerSettleReq extends NetHandler {
         // Parse request
         var req = InfinityTowerSettleReq.parseFrom(message);
         
-        // Settle
+        // Get manager and save current level/build
         var manager = session.getPlayer().getInfinityTowerManager();
+        
+        int level = manager.getLevelId();
+        long build = manager.getBuildId();
+        
+        // Settle
         var change = manager.settle(req.getValue());
         
         if (change == null) {
@@ -25,10 +30,10 @@ public class HandlerInfinityTowerSettleReq extends NetHandler {
         }
         
         // Get next level
-        int nextLevel = manager.getLevelId() + 1;
+        int nextLevel = level + 1;
         
         // Try to apply for next level
-        if (!manager.apply(nextLevel, -1)) {
+        if (!manager.apply(nextLevel, build)) {
             nextLevel = 0;
         }
         

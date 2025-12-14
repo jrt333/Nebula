@@ -70,6 +70,10 @@ public class InstanceManager extends PlayerManager {
         // Set extra data
         change.setExtraData(settleData);
         
+        // Clear instance
+        this.curInstanceId = 0;
+        this.rewardType = 0;
+        
         // Success
         return change.setSuccess(true);
     }

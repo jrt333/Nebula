@@ -162,7 +162,7 @@ public class GachaModule extends GameContextModule {
         player.getGachaManager().saveBanner(info);
         
         // Add history
-        var log = new GachaHistoryLog(data.getGachaType(), results);
+        var log = new GachaHistoryLog(data.getStorageId(), data.getId(), results);
         player.getGachaManager().addGachaHistory(log);
         
         // Trigger achievements

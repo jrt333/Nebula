@@ -4,6 +4,7 @@ import emu.nebula.data.BaseDef;
 import emu.nebula.data.GameData;
 import emu.nebula.data.ResourceType;
 import emu.nebula.util.WeightedList;
+
 import lombok.Getter;
 
 @Getter
@@ -55,13 +56,14 @@ public class GachaDef extends BaseDef {
         
         if (this.ATypePkg > 0) {
             packageA.add(
-                    10000 - storage.getATypeUpProb(), 
-                    new GachaPackage(GachaPackageType.A, this.ATypePkg)
+                10000 - storage.getATypeUpProb(), 
+                new GachaPackage(GachaPackageType.A, this.ATypePkg)
             );
-        } if (this.ATypeUpPkg > 0) {
+        }
+        if (this.ATypeUpPkg > 0) {
             packageA.add(
-                    storage.getATypeUpProb(),
-                    new GachaPackage(GachaPackageType.A_UP, this.ATypeUpPkg)
+                storage.getATypeUpProb(),
+                new GachaPackage(GachaPackageType.A_UP, this.ATypeUpPkg)
             );
         }
         
@@ -70,18 +72,20 @@ public class GachaDef extends BaseDef {
         
         if (this.BTypePkg > 0) {
             packageB.add(
-                    10000 - storage.getBTypeUpProb(), 
-                    new GachaPackage(GachaPackageType.B, this.BTypePkg)
+                storage.getBTypeProb(), 
+                new GachaPackage(GachaPackageType.B, this.BTypePkg)
             );
-        } else if (this.BGuaranteePkg > 0) {
+        }
+        if (this.BGuaranteePkg > 0) {
             packageB.add(
-                    10000 - storage.getBTypeUpProb(),
-                    new GachaPackage(GachaPackageType.B, this.BGuaranteePkg)
+                storage.getBTypeGuaranteeProb(), 
+                new GachaPackage(GachaPackageType.B, this.BGuaranteePkg)
             );
-        } if (this.BTypeUpPkg > 0) {
+        } 
+        if (this.BTypeUpPkg > 0) {
             packageB.add(
-                    storage.getBTypeUpProb(),
-                    new GachaPackage(GachaPackageType.B_UP, this.BTypeUpPkg)
+                storage.getBTypeUpProb(),
+                new GachaPackage(GachaPackageType.B_UP, this.BTypeUpPkg)
             );
         }
         
@@ -90,8 +94,8 @@ public class GachaDef extends BaseDef {
         
         if (this.CTypePkg > 0) {
             packageC.add(
-                    10000,
-                    new GachaPackage(GachaPackageType.C, this.CTypePkg)
+                10000,
+                new GachaPackage(GachaPackageType.C, this.CTypePkg)
             );
         }
     }

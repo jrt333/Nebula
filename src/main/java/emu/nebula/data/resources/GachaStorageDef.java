@@ -16,6 +16,7 @@ public class GachaStorageDef extends BaseDef {
     private int CostQty;
     
     private int ATypeUpProb;
+    private int BTypeProb;
     private int BTypeUpProb;
     private int BTypeGuaranteeProb;
     

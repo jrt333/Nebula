@@ -10,6 +10,7 @@ import lombok.Getter;
 @Entity(value = "banner_info", useDiscriminator = false)
 public class GachaHistoryLog {
     private int type;
+    private int gid;
     private long time;
     private IntList ids;
     
@@ -18,8 +19,9 @@ public class GachaHistoryLog {
         
     }
     
-    public GachaHistoryLog(int type, IntList results) {
+    public GachaHistoryLog(int type, int gachaId, IntList results) {
         this.type = type;
+        this.gid = gachaId;
         this.time = Nebula.getCurrentTime();
         this.ids = results;
     }
@@ -28,7 +30,7 @@ public class GachaHistoryLog {
     
     public GachaHistory toProto() {
         var proto = GachaHistory.newInstance()
-                .setGid(this.getType())
+                .setGid(this.getGid())
                 .setTime(this.getTime());
         
         for (int id : this.getIds()) {

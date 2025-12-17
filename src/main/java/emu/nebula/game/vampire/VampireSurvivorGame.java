@@ -9,7 +9,6 @@ import emu.nebula.data.resources.VampireSurvivorDef;
 import emu.nebula.proto.Public.CardInfo;
 import emu.nebula.proto.Public.VampireSurvivorLevelReward;
 import emu.nebula.util.WeightedList;
-
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;

@@ -128,7 +128,10 @@ public class StarTowerPotentialCase extends StarTowerBaseCase {
         if (potential == null) {
             return;
         }
-
+        
+        // Achievement
+        this.triggerBonusLevelAchievement(potential);
+        
         // Add potential
         var change = this.getGame().addItem(potential.getId(), potential.getLevel());
 
@@ -142,7 +145,22 @@ public class StarTowerPotentialCase extends StarTowerBaseCase {
             this.getRoom().addCase(rsp.getMutableCases(), towerCase);
         }
     }
-
+    
+    private void triggerBonusLevelAchievement(StarTowerPotentialInfo potential) {
+        // Check if potential is lucky (+! or more levels)
+        if (potential.getLevel() <= 1) {
+            return;
+        }
+        
+        if (this.getGame().getPotentials().containsKey(charId)) {
+            // Enhancing potentials
+            this.getGame().getAchievementManager().trigger(AchievementCondition.TowerSpecificPotentialLuckyTotal, 1);
+        } else {
+            // Adding new potential
+            this.getGame().getAchievementManager().trigger(AchievementCondition.TowerSpecificPotentialBonusTotal, 1);
+        }
+    }
+    
     // Proto
 
     @Override

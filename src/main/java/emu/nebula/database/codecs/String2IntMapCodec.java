@@ -7,7 +7,7 @@ import org.bson.codecs.Codec;
 import org.bson.codecs.DecoderContext;
 import org.bson.codecs.EncoderContext;
 
-import emu.nebula.util.String2IntMap;
+import emu.nebula.util.ints.String2IntMap;
 
 /**
  * Custom mongodb codec for encoding/decoding fastutil int2int maps.

@@ -76,6 +76,9 @@ public class GachaModule extends GameContextModule {
         var transformItemsDst = new ItemParamMap();
         var bonusItems = new ItemParamMap();
         
+        // Character count (for achievements)
+        int characters = 0;
+        
         // Add for player
         for (var entry : acquireItems.getItems().int2ObjectEntrySet()) {
             // Get ids and aquire params
@@ -102,6 +105,9 @@ public class GachaModule extends GameContextModule {
                     transformItemsDst.add(characterData.getFragmentsId(), characterData.getTransformQty() * count);
                     transformItemsDst.add(24, 40 * count); // Expert permits
                 }
+                
+                // Add to count
+                characters += acquire.getCount();
             } else if (acquire.getType() == ItemType.Disc) {
                 // Get add amount
                 int begin = acquire.getBegin();
@@ -162,11 +168,12 @@ public class GachaModule extends GameContextModule {
         player.getGachaManager().saveBanner(info);
         
         // Add history
-        var log = new GachaHistoryLog(data.getGachaType(), results);
+        var log = new GachaHistoryLog(data.getStorageId(), data.getId(), results);
         player.getGachaManager().addGachaHistory(log);
         
         // Trigger achievements
         player.trigger(AchievementCondition.GachaTotal, amount);
+        player.trigger(AchievementCondition.GachaCharacterTotal, characters);
         
         // Complete
         return new GachaResult(info, change, results);

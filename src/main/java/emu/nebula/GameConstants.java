@@ -56,9 +56,6 @@ public class GameConstants {
     public static final int MAX_PENDING_FRIENDSHIPS = 30;
     
     public static final int TOWER_COIN_ITEM_ID = 11;
-    public static final int[] TOWER_COMMON_SUB_NOTE_SKILLS = new int[] {
-        90011, 90012, 90013, 90014, 90015, 90016, 90017
-    };
     public static final int[] TOWER_EVENTS_IDS = new int[] {
         101, 102, 104, 105, 106, 107, 108, 114, 115, 116, 126, 127, 128
     };

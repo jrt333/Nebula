@@ -64,7 +64,7 @@ public class StarTowerHawkerCase extends StarTowerBaseCase {
         }
         for (int i = 0; i < subNotes; i++) {
             // Randomize sub note
-            int id = Utils.randomElement(this.getGame().getSubNoteDropList());
+            int id = this.getGame().getRandomSubNoteId();
             
             // Create sub note shop item
             StarTowerShopGoods goods = null;

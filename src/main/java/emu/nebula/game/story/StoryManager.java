@@ -9,12 +9,16 @@ import dev.morphia.annotations.PostLoad;
 import emu.nebula.Nebula;
 import emu.nebula.data.GameData;
 import emu.nebula.database.GameDatabaseObject;
+import emu.nebula.game.achievement.AchievementCondition;
 import emu.nebula.game.player.Player;
 import emu.nebula.game.player.PlayerChangeInfo;
 import emu.nebula.game.player.PlayerManager;
+import emu.nebula.net.NetMsgId;
 import emu.nebula.proto.PlayerData.PlayerInfo;
+import emu.nebula.proto.Public.HandbookInfo;
 import emu.nebula.proto.Public.Story;
 import emu.nebula.proto.StorySett.StorySettle;
+import emu.nebula.util.Bitset;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
@@ -75,6 +79,7 @@ public class StoryManager extends PlayerManager implements GameDatabaseObject {
     public PlayerChangeInfo settle(RepeatedMessage<StorySettle> list, RepeatedInt evidences) {
         // Player change info
         var change = new PlayerChangeInfo();
+        boolean updateHandbook = false;
         
         // Handle regular story
         for (var settle : list) {
@@ -99,6 +104,9 @@ public class StoryManager extends PlayerManager implements GameDatabaseObject {
             // Add rewards
             this.getPlayer().getInventory().addItems(data.getRewards(), change);
             
+            // Trigger any achievement/quests
+            this.getPlayer().trigger(AchievementCondition.StoryClear, 1, id, 0);
+            
             // Save to db
             Nebula.getGameDatabase().addToSet(this, this.getPlayerUid(), "completedStories", id);
         }
@@ -116,6 +124,14 @@ public class StoryManager extends PlayerManager implements GameDatabaseObject {
             
             // Save to db
             Nebula.getGameDatabase().addToSet(this, this.getPlayerUid(), "evidences", id);
+        }
+        
+        // Update handbook
+        if (updateHandbook) {
+            this.getPlayer().addNextPackage(
+                NetMsgId.handbook_change_notify,
+                this.getCgHandbook()
+            );
         }
         
         // Clear current story
@@ -183,6 +199,31 @@ public class StoryManager extends PlayerManager implements GameDatabaseObject {
         
         // Complete
         return changes;
+    }
+    
+    // Handbook
+    
+    public HandbookInfo getCgHandbook() {
+        var bitset = new Bitset();
+        
+        if (Nebula.getConfig().getServerOptions().unlockAllStoryCGs) {
+            for (var data : GameData.getMainScreenCGDataTable()) {
+                // Get handbook data
+                var handbookData = GameData.getHandbookDataTable().get(data.getId());
+                if (handbookData == null || handbookData.getType() != 3) {
+                    continue;
+                }
+                
+                // Set flag
+                bitset.setBit(handbookData.getIndex());
+            }
+        }
+        
+        var handbook = HandbookInfo.newInstance()
+                .setType(3)
+                .setData(bitset.toByteArray());
+        
+        return handbook;
     }
     
     // Proto

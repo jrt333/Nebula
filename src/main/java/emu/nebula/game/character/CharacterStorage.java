@@ -12,8 +12,10 @@ import emu.nebula.net.NetMsgId;
 import emu.nebula.proto.Public.HandbookInfo;
 import emu.nebula.util.Bitset;
 import emu.nebula.game.achievement.AchievementCondition;
+import emu.nebula.game.inventory.ItemParamMap;
 import emu.nebula.game.player.Player;
 import emu.nebula.game.player.PlayerChangeInfo;
+
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import lombok.Getter;
@@ -115,6 +117,67 @@ public class CharacterStorage extends PlayerManager {
                 .setData(bitset.toByteArray());
         
         return handbook;
+    }
+    
+    public void triggerCharacterAchievements(GameCharacter character) {
+        // Create elements we want to trigger the achievement for
+        var elements = new ItemParamMap();
+        elements.put(character.getData().getElementType().getValue(), 0);
+
+        // Calculate the amount of characters with the elements
+        this.triggerCharacterAchievements(elements, character.getLevel());
+    }
+    
+    public void triggerCharacterAchievements(Collection<GameCharacter> characters, int level) {
+        var elements = new ItemParamMap();
+        
+        for (var character : characters) {
+            elements.put(character.getElementType().getValue(), 0);
+        }
+        
+        // Calculate the amount of characters with the elements
+        this.triggerCharacterAchievements(elements, level);
+    }
+    
+    private void triggerCharacterAchievements(ItemParamMap elements, int level) {
+        // Get current amount of characters with same level or higher
+        int anyCount = 0;
+        
+        for (var character : this.getCharacterCollection()) {
+            if (character.getLevel() >= level) {
+                anyCount++;
+            } else {
+                continue;
+            }
+            
+            int element = character.getElementType().getValue();
+            
+            if (elements.containsKey(element)) {
+                elements.add(element, 1);
+            }
+        }
+        
+        // Trigger achievements
+        var achievements = this.getPlayer().getAchievementManager();
+        
+        achievements.trigger(
+            AchievementCondition.CharactersWithSpecificLevelAndQuantity,
+            anyCount,
+            level,
+            0
+        );
+        
+        for (var entry : elements) {
+            int element = entry.getIntKey();
+            int amount = entry.getIntValue();
+            
+            achievements.trigger(
+                AchievementCondition.CharactersWithSpecificNumberLevelAndAttributes,
+                amount,
+                level,
+                element
+            );
+        }
     }
     
     // Discs

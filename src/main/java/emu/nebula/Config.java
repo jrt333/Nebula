@@ -109,6 +109,8 @@ public class Config {
         public boolean skipIntro = false;
         // Unlocks all instances (Monolith, Bounty Trials, etc) for players to enter without needing to do the previous levels.
         public boolean unlockInstances = true;
+        // Unlocks all story CGs to use in the showcase
+        public boolean unlockAllStoryCGs = false;
         // How long to wait (in seconds) after the last http request from a session before removing it from the server.
         public int sessionTimeout = 300;
         // The offset hour for when daily quests are refreshed in UTC. Example: "dailyResetHour = 4" means dailies will be refreshed at UTC+4 12:00 AM every day.
@@ -149,10 +151,10 @@ public class Config {
             this.sender = "GM";
             this.content = "欢迎来到大鸟转转转-星塔旅人！QQ交流群：531390126，祝你游戏愉快！";
             this.attachments = List.of(
-                    new ItemParam(86009, 20),
-                    new ItemParam(86002, 20),
-                    new ItemParam(1, 9_000_000),
-                    new ItemParam(2, 90_000));
+                new ItemParam(86009, 1),
+                new ItemParam(86002, 1),
+                new ItemParam(1, 1_000_000),
+                new ItemParam(2, 30_000));
         }
     }
 

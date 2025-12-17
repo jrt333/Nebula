@@ -95,6 +95,8 @@ public class GameData {
     @Getter private static DataTable<StorySetSectionDef> StorySetSectionDataTable = new DataTable<>();
     @Getter private static DataTable<StoryEvidenceDef> StoryEvidenceDataTable = new DataTable<>();
     
+    @Getter private static DataTable<MainScreenCGDef> MainScreenCGDataTable = new DataTable<>();
+    
     // ===== Daily Quests =====
     @Getter private static DataTable<DailyQuestDef> DailyQuestDataTable = new DataTable<>();
     @Getter private static DataTable<DailyQuestActiveDef> DailyQuestActiveDataTable = new DataTable<>();
@@ -120,6 +122,7 @@ public class GameData {
     @Getter private static DataTable<StarTowerFloorExpDef> StarTowerFloorExpDataTable = new DataTable<>();
     @Getter private static DataTable<StarTowerTeamExpDef> StarTowerTeamExpDataTable = new DataTable<>();
     @Getter private static DataTable<StarTowerEventDef> StarTowerEventDataTable = new DataTable<>();
+    @Getter private static DataTable<StarTowerBuildRankDef> StarTowerBuildRankDataTable = new DataTable<>();
     @Getter private static DataTable<SubNoteSkillPromoteGroupDef> SubNoteSkillPromoteGroupDataTable = new DataTable<>();
     
     @Getter private static DataTable<PotentialDef> PotentialDataTable = new DataTable<>();

@@ -8,6 +8,7 @@ import dev.morphia.annotations.Indexed;
 import emu.nebula.Nebula;
 import emu.nebula.data.GameData;
 import emu.nebula.data.resources.SecondarySkillDef;
+import emu.nebula.data.resources.StarTowerBuildRankDef;
 import emu.nebula.database.GameDatabaseObject;
 import emu.nebula.game.character.GameCharacter;
 import emu.nebula.game.character.GameDisc;
@@ -160,6 +161,19 @@ public class StarTowerBuild implements GameDatabaseObject {
         
         // Complete
         return this.score;
+    }
+    
+    public StarTowerBuildRankDef getRank() {
+        StarTowerBuildRankDef rank = null;
+        
+        // TODO optimize
+        for (var data : GameData.getStarTowerBuildRankDataTable()) {
+            if (this.getScore() >= data.getMinGrade()) {
+                rank = data;
+            }
+        }
+        
+        return rank;
     }
     
     // Proto

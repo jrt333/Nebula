@@ -20,7 +20,7 @@ import emu.nebula.proto.Public.Item;
 import emu.nebula.proto.Public.Res;
 import emu.nebula.proto.Public.Title;
 import emu.nebula.proto.Public.UI32;
-import emu.nebula.util.String2IntMap;
+import emu.nebula.util.ints.String2IntMap;
 import emu.nebula.game.achievement.AchievementCondition;
 import emu.nebula.game.player.Player;
 import emu.nebula.game.player.PlayerChangeInfo;

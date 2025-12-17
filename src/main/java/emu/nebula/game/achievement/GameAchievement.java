@@ -75,11 +75,7 @@ public class GameAchievement {
         var data = this.getData();
         if (data == null) return false;
         
-        if (data.hasParam1(param1) && data.getParam1() != param1) {
-            return false;
-        }
-        
-        if (data.hasParam2(param2) && data.getParam2() != param2) {
+        if (!data.matchParam1(param1) || !data.matchParam2(param2)) {
             return false;
         }
         

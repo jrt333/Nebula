@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import emu.nebula.data.BaseDef;
 import emu.nebula.data.ResourceType;
+
 import lombok.Getter;
 
 @Getter
@@ -12,6 +13,7 @@ public class StarTowerDef extends BaseDef {
     private int Id;
     private int GroupId;
     private int Difficulty;
+    private int SubNoteSkillDropGroupId;
     private int[] FloorNum;
     
     private transient int maxFloors;

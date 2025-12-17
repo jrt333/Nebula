@@ -5,11 +5,11 @@ import java.util.List;
 
 import dev.morphia.annotations.Entity;
 
-import emu.nebula.GameConstants;
 import emu.nebula.data.GameData;
 import emu.nebula.data.resources.SecondarySkillDef;
 import emu.nebula.data.resources.StarTowerDef;
 import emu.nebula.data.resources.StarTowerStageDef;
+import emu.nebula.data.resources.SubNoteSkillDropGroupDef;
 import emu.nebula.game.achievement.AchievementCondition;
 import emu.nebula.game.achievement.AchievementManager;
 import emu.nebula.game.character.ElementType;
@@ -83,10 +83,7 @@ public class StarTowerGame {
     private ItemParamMap res;
     private ItemParamMap potentials;
     private IntSet secondarySkills;
-
-    // Sub note skill drop list
-    private IntList subNoteDropList;
-
+    
     // Modifiers
     private StarTowerModifiers modifiers;
     
@@ -122,10 +119,7 @@ public class StarTowerGame {
         this.secondarySkills = new IntOpenHashSet();
 
         this.newInfos = new ItemParamMap();
-
-        // Init melody drop list
-        this.subNoteDropList = new IntArrayList();
-
+        
         // Init modifiers
         this.modifiers = new StarTowerModifiers(this);
 
@@ -140,13 +134,7 @@ public class StarTowerGame {
             if (character == null) {
                 continue;
             }
-
-            // Add sub note skill id to drop list
-            int subNoteSkill = character.getData().getElementType().getSubNoteSkillItemId();
-            if (subNoteSkill > 0 && !this.subNoteDropList.contains(subNoteSkill)) {
-                this.subNoteDropList.add(subNoteSkill);
-            }
-
+            
             // Add to character list
             charList.add(id);
         }
@@ -177,11 +165,6 @@ public class StarTowerGame {
         
         // Temp data to cache for rare potential count
         this.rarePotentialCount = new ItemParamMap();
-        
-        // Finish setting up droppable sub note skills
-        for (int id : GameConstants.TOWER_COMMON_SUB_NOTE_SKILLS) {
-            this.subNoteDropList.add(id);
-        }
         
         // Enter first room
         this.enterNextRoom();
@@ -216,7 +199,7 @@ public class StarTowerGame {
     }
     
     public int getTotalPotentialCount() {
-        return this.getItems().values().intStream().reduce(0, Integer::sum);
+        return this.getPotentials().values().intStream().reduce(0, Integer::sum);
     }
     
     /**
@@ -784,7 +767,8 @@ public class StarTowerGame {
     }
     
     public int getRandomSubNoteId() {
-        return Utils.randomElement(this.getSubNoteDropList());
+        int groupId = this.getData().getSubNoteSkillDropGroupId();
+        return SubNoteSkillDropGroupDef.getRandomDrop(groupId);
     }
 
     private PlayerChangeInfo addRandomSubNoteSkills(PlayerChangeInfo change) {

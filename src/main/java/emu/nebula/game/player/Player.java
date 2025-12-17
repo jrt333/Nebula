@@ -970,6 +970,7 @@ public class Player implements GameDatabaseObject {
         // Handbook
         proto.addHandbook(this.getCharacters().getCharacterHandbook());
         proto.addHandbook(this.getCharacters().getDiscHandbook());
+        proto.addHandbook(this.getStoryManager().getCgHandbook());
         
         // Phone
         var phone = proto.getMutablePhone();

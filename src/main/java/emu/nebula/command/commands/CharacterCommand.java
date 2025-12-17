@@ -83,6 +83,13 @@ public class CharacterCommand implements CommandHandler {
         }
         
         player.addNextPackage(NetMsgId.chars_final_notify, proto);
+        
+        // Trigger achievements
+        if (args.getLevel() > 0 && args.getLevel() <= 90) {
+            player.getCharacters().triggerCharacterAchievements(modified, args.getLevel());
+        }
+        
+        // Result
         return "Updated " + modified.size() + " character(s)";
     }
 }

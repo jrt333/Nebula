@@ -166,6 +166,100 @@ public class StarTowerManager extends PlayerManager {
         return this.getBuilds().containsKey(id);
     }
     
+    public void addBuild(StarTowerBuild build) {
+        // Add to builds
+        this.getBuilds().put(build.getUid(), build);
+        
+        // Save build to database
+        build.save();
+        
+        // Achievement
+        var rank = build.getRank();
+        if (rank != null) {
+            this.getPlayer().getAchievementManager().trigger(
+                AchievementCondition.TowerBuildSpecificScoreWithTotal,
+                1,
+                rank.getRarity(),
+                0
+            );
+        }
+    }
+    
+    public PlayerChangeInfo saveBuild(boolean delete, String name, boolean lock) {
+        // Sanity check
+        if (this.getLastBuild() == null) {
+            return null;
+        }
+        
+        // Create player change info
+        var change = new PlayerChangeInfo();
+        
+        // Cache build
+        var build = this.lastBuild;
+        
+        // Clear reference to build
+        this.lastBuild = null;
+        
+        // Check if the player wants this build or not
+        if (delete) {
+            return this.dismantleBuild(build, change);
+        }
+        
+        // Check limit
+        if (this.getBuilds().size() >= 50) {
+            return null;
+        }
+        
+        // Add build
+        this.addBuild(build);
+        
+        // Success
+        return change;
+    }
+    
+    private PlayerChangeInfo dismantleBuild(StarTowerBuild build, PlayerChangeInfo change) {
+        // Calculate quanity of tickets from record score
+        int count = (int) Math.floor(build.getScore() / 100);
+        
+        // Check weekly tickets
+        int maxAmount = this.getPlayer().getProgress().getMaxEarnableWeeklyTowerTickets();
+        count = Math.min(maxAmount, count);
+        
+        // Add journey tickets
+        this.getPlayer().getInventory().addItem(12, count, change);
+        
+        // Add to weekly ticket log
+        this.getPlayer().getProgress().addWeeklyTowerTicketLog(count);
+        
+        // Success
+        return change;
+    }
+    
+    public PlayerChangeInfo deleteBuild(long buildId, PlayerChangeInfo change) {
+        // Create change info
+        if (change == null) {
+            change = new PlayerChangeInfo();
+        }
+        
+        // Get build
+        var build = this.getBuilds().remove(buildId);
+        
+        if (build == null) {
+            return change;
+        }
+        
+        // Delete
+        build.delete();
+        
+        // Add journey tickets
+        this.dismantleBuild(build, change);
+        
+        // Success
+        return change;
+    }
+    
+    // Game
+    
     public PlayerChangeInfo apply(StarTowerApplyReq req) {
         // Sanity checks
         var data = GameData.getStarTowerDataTable().get(req.getId());
@@ -295,84 +389,6 @@ public class StarTowerManager extends PlayerManager {
             diff,
             0
         );
-    }
-    
-    // Build
-    
-    private PlayerChangeInfo dismantleBuild(StarTowerBuild build, PlayerChangeInfo change) {
-        // Calculate quanity of tickets from record score
-        int count = (int) Math.floor(build.getScore() / 100);
-        
-        // Check weekly tickets
-        int maxAmount = this.getPlayer().getProgress().getMaxEarnableWeeklyTowerTickets();
-        count = Math.min(maxAmount, count);
-        
-        // Add journey tickets
-        this.getPlayer().getInventory().addItem(12, count, change);
-        
-        // Add to weekly ticket log
-        this.getPlayer().getProgress().addWeeklyTowerTicketLog(count);
-        
-        // Success
-        return change;
-    }
-    
-    public PlayerChangeInfo saveBuild(boolean delete, String name, boolean lock) {
-        // Sanity check
-        if (this.getLastBuild() == null) {
-            return null;
-        }
-        
-        // Create player change info
-        var change = new PlayerChangeInfo();
-        
-        // Cache build
-        var build = this.lastBuild;
-        
-        // Clear reference to build
-        this.lastBuild = null;
-        
-        // Check if the player wants this build or not
-        if (delete) {
-            return this.dismantleBuild(build, change);
-        }
-        
-        // Check limit
-        if (this.getBuilds().size() >= 50) {
-            return null;
-        }
-        
-        // Add to builds
-        this.getBuilds().put(build.getUid(), build);
-        
-        // Save build to database
-        build.save();
-        
-        // Success
-        return change;
-    }
-    
-    public PlayerChangeInfo deleteBuild(long buildId, PlayerChangeInfo change) {
-        // Create change info
-        if (change == null) {
-            change = new PlayerChangeInfo();
-        }
-        
-        // Get build
-        var build = this.getBuilds().remove(buildId);
-        
-        if (build == null) {
-            return change;
-        }
-        
-        // Delete
-        build.delete();
-        
-        // Add journey tickets
-        this.dismantleBuild(build, change);
-        
-        // Success
-        return change;
     }
     
     // Database

@@ -35,7 +35,7 @@ import emu.nebula.proto.PublicStarTower.StarTowerChar;
 import emu.nebula.proto.PublicStarTower.StarTowerCharGem;
 import emu.nebula.server.error.ServerException;
 import emu.nebula.util.Bitset;
-import emu.nebula.util.CustomIntArray;
+import emu.nebula.util.ints.CustomIntArray;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
@@ -119,6 +119,10 @@ public class GameCharacter implements GameDatabaseObject {
         }
     }
     
+    public ElementType getElementType() {
+        return this.getData().getElementType();
+    }
+    
     public boolean isMaster() {
         return this.getData().getGrade() == 1;
     }
@@ -193,6 +197,8 @@ public class GameCharacter implements GameDatabaseObject {
         if (this.level > oldLevel) {
             // Trigger quest
             this.getPlayer().trigger(QuestCondition.CharacterUpTotal, this.level - oldLevel);
+            // Trigger any achievements
+            this.getPlayer().getCharacters().triggerCharacterAchievements(this);
         }
         
         // Save to database

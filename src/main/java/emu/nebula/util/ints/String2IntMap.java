@@ -1,4 +1,4 @@
-package emu.nebula.util;
+package emu.nebula.util.ints;
 
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 

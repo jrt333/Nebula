@@ -24,7 +24,8 @@ public class Config {
     public RemoteCommand remoteCommand = new RemoteCommand();
 
     public int customDataVersion = 0;
-    public String region = "tw";
+    public String region = "global";
+    public String language = "en_US";
     
     public String resourceDir = "./resources";
     public String webFilesDir = "./web";

@@ -153,8 +153,8 @@ public class Config {
             this.attachments = List.of(
                 new ItemParam(86009, 1),
                 new ItemParam(86002, 1),
-                new ItemParam(1, 1_000_000),
-                new ItemParam(2, 30_000));
+                new ItemParam(1, 1_0000_000),
+                new ItemParam(2, 30_0000));
         }
     }
 

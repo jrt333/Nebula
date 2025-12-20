@@ -27,7 +27,9 @@ public class CharacterGemPreset {
         return this.getGems().length;
     }
     
-    public int getGemIndex(int slotIndex) {
+    public int getGemIndex(int slotId) {
+        int slotIndex = slotId - 1;
+        
         if (slotIndex < 0 || slotIndex >= this.getLength()) {
             return -1;
         }

@@ -36,6 +36,10 @@ public class CharacterGemSlot {
         return getGems().size() >= GameConstants.CHARACTER_MAX_GEMS_PER_SLOT;
     }
     
+    public boolean isEmpty() {
+        return getGems().size() <= 0;
+    }
+    
     // Proto
     
     public CharGemSlot toProto() {

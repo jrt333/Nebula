@@ -22,8 +22,18 @@ public class PotentialDef extends BaseDef {
         return Id;
     }
 
-    public boolean isRare() {
+    public boolean isSpecial() {
         return this.BranchType != 3;
+    }
+    
+    public int getMaxLevel() {
+        // Check if regular potential
+        if (this.BranchType == 3) {
+            return 6;
+        }
+        
+        // Special potential should always have a max level of 1
+        return this.MaxLevel;
     }
     
     public int getMaxLevel(StarTowerGame game) {

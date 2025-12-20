@@ -25,6 +25,10 @@ public class CharacterGem {
     public void setLocked(boolean locked) {
         this.locked = locked;
     }
+    
+    public void setAttributes(IntList attributes) {
+        this.attributes = attributes.toIntArray();
+    }
 
     public void setNewAttributes(IntList attributes) {
         this.alterAttributes = attributes.toIntArray();

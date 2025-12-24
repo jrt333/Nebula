@@ -10,6 +10,7 @@ public class GameConstants {
     public static int DATA_VERSION = 0;
     
     // Set data versions for each region
+    // TODO move this to a json file inside the jar to make it easier to auto-update
     static {
         RegionConfig.getRegion("global")
             .setDataVersion(73);

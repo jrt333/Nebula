@@ -80,11 +80,12 @@ public class AutoBuildCommand implements CommandHandler {
             }
         }
         
-        // Get target score
-        int targetScore = 0;
+        // Get target level/score
         int targetLevel = 0;
+        int targetScore = 0;
         
         if (args.getSkill() < 0) {
+            // Default target level is 40
             targetLevel = 40;
         } else {
             targetScore = args.getSkill();
@@ -95,6 +96,7 @@ public class AutoBuildCommand implements CommandHandler {
             targetLevel = args.getLevel();
         }
         
+        // Get target score from record level
         if (targetLevel > 0) {
             var data = GameData.getStarTowerBuildRankDataTable().get(targetLevel);
             if (data != null) {
@@ -184,7 +186,7 @@ public class AutoBuildCommand implements CommandHandler {
             }
         }
         
-        // Add random trekker from list
+        // If we have no versatile or support trekkers, add a random trekker from the remaining list
         if (list.size() > 0) {
             builder.getCharacters().add(Utils.randomElement(list));
         }
@@ -372,12 +374,7 @@ public class AutoBuildCommand implements CommandHandler {
         var main = builder.getCharacters().get(0);
         
         // Get random potentials
-        while (potentialScore > 0) {
-            // End
-            if (potentialScore <= 0 || characters.isEmpty()) {
-                break;
-            }
-            
+        while (potentialScore > 0 && !characters.isEmpty()) {
             // Get random character
             var character = Utils.randomElement(characters);
             

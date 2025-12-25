@@ -155,6 +155,9 @@ public class GameData {
     
     // ===== Activity =====
     @Getter private static DataTable<ActivityDef> ActivityDataTable = new DataTable<>();
+    
+    // Activity: Login Reward
+    @Getter private static DataTable<LoginRewardGroupControlDef> LoginRewardGroupControlDataTable = new DataTable<>();
 
     // Activity: Tower Defense
     @Getter private static DataTable<TowerDefenseLevelDef> TowerDefenseLevelDataTable = new DataTable<>();

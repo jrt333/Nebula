@@ -804,6 +804,9 @@ public class Player implements GameDatabaseObject {
         // Fix any broken honor ids
         this.checkBrokenHonor();
         
+        // Update activities
+        this.getActivityManager().onLogin();
+        
         // Update last login time
         this.lastLogin = System.currentTimeMillis();
         Nebula.getGameDatabase().update(this, this.getUid(), "lastLogin", this.getLastLogin());

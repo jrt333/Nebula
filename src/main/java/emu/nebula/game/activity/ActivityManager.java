@@ -111,6 +111,7 @@ public class ActivityManager extends PlayerManager implements GameDatabaseObject
         
         // TODO improve activity creation
         GameActivity activity = switch (data.getType()) {
+            case LoginReward -> new LoginRewardActivity(this, data);
             case TowerDefense -> new TowerDefenseActivity(this, data);
             case Trial -> new TrialActivity(this, data);
             case Levels -> new LevelsActivity(this, data);
@@ -121,6 +122,14 @@ public class ActivityManager extends PlayerManager implements GameDatabaseObject
         };
         
         return activity;
+    }
+    
+    // Events
+    
+    public synchronized void onLogin() {
+        for (var activity : this.getActivities().values()) {
+            activity.onLogin();
+        }
     }
 
     // Database

@@ -18,7 +18,8 @@ public class ActivityModule extends GameContextModule {
         // TODO make an activity json file to read activity ids from
         
         // Trial activities
-        this.activities.add(700104);
+        this.activities.add(700105);
+        this.activities.add(700106);
         this.activities.add(700107);
         this.activities.add(700108);
 
@@ -34,6 +35,10 @@ public class ActivityModule extends GameContextModule {
         this.activities.add(2010101);
         this.activities.add(2010103);
         this.activities.add(2010104);
+        
+        // Christmas 2025 login events
+        this.activities.add(301011);
+        this.activities.add(301012);
         
         // Trekker versus
         this.activities.add(600001);

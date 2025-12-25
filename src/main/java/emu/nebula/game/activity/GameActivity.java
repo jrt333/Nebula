@@ -41,6 +41,12 @@ public abstract class GameActivity {
         );
     }
     
+    // Events
+    
+    public void onLogin() {
+        
+    }
+    
     // Proto
     
     public Activity toProto() {

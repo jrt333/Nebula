@@ -14,7 +14,7 @@ public class HandlerPlayerPingReq extends NetHandler {
     public byte[] handle(GameSession session, byte[] message) throws Exception {
         // Create response
         var rsp = Pong.newInstance()
-                .setServerTs(Nebula.getCurrentTime());
+                .setServerTs(Nebula.getCurrentServerTime());
         
         return session.encodeMsg(NetMsgId.player_ping_succeed_ack, rsp);
     }

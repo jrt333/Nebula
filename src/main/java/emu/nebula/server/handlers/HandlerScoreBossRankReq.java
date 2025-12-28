@@ -14,7 +14,7 @@ public class HandlerScoreBossRankReq extends NetHandler {
     public byte[] handle(GameSession session, byte[] message) throws Exception {
         // Build response
         var rsp = ScoreBossRankInfo.newInstance()
-                .setLastRefreshTime(Nebula.getCurrentTime());
+                .setLastRefreshTime(Nebula.getCurrentServerTime());
         
         // Get self
         var self = session.getPlayer().getScoreBossManager().getRankEntry();

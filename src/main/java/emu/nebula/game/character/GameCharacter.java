@@ -92,7 +92,7 @@ public class GameCharacter implements GameDatabaseObject {
         this.talents = new Bitset();
         this.gemPresets = new ArrayList<>();
         this.gemSlots = new CharacterGemSlot[GameConstants.CHARACTER_MAX_GEM_SLOTS];
-        this.createTime = Nebula.getCurrentTime();
+        this.createTime = Nebula.getCurrentServerTime();
         
         this.contact = new CharacterContact(this);
     }

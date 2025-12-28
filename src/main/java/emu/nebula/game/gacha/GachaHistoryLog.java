@@ -22,7 +22,7 @@ public class GachaHistoryLog {
     public GachaHistoryLog(int type, int gachaId, IntList results) {
         this.type = type;
         this.gid = gachaId;
-        this.time = Nebula.getCurrentTime();
+        this.time = Nebula.getCurrentServerTime();
         this.ids = results;
     }
     

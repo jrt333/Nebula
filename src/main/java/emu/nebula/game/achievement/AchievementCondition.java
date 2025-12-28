@@ -56,7 +56,6 @@ public enum AchievementCondition {
     LoginTotal                                                   (51),
     QuestTravelerDuelChallengeTotal                              (52),
     QuestTourGuideSpecific                                       (53),
-    QuestTravelerDuelSpecific                                    (54),
     QuestWithSpecificType                                        (55),
     RegionBossClearSpecificFullStarWithBossIdAndDifficulty       (56),
     RegionBossClearSpecificLevelWithDifficultyAndTotal           (57),
@@ -67,12 +66,8 @@ public enum AchievementCondition {
     StageClearSpecificStars                                      (62),
     StoryClear                                                   (63),
     TravelerDuelChallengeSpecificBoosLevelWithDifficultyAndTotal (64),
-    TravelerDuelClearBossTotal                                   (65),
-    TravelerDuelClearSpecificBossIdAndDifficulty                 (66),
     TravelerDuelChallengeClearSpecificBossLevelAndAffix          (67),
-    TravelerDuelClearSpecificBossLevelWithDifficultyAndTotal     (68),
     TravelerDuelClearSpecificBossTotal                           (69),
-    TravelerDuelChallengeRankUploadTotal                         (70),
     WorldClassSpecific                                           (71),
     RegionBossClearSpecificTypeWithTotal                         (72),
     CharactersWithSpecificDatingCount                            (73),
@@ -82,7 +77,6 @@ public enum AchievementCondition {
     VampireSurvivorPassedSpecificLevel                           (77),
     CharacterParticipateTowerNumber                              (78),
     CharacterAllSkillReachSpecificLevel                          (79),
-    TravelerDuelPlayTotal                                        (80),
     VampireClearTotal                                            (81),
     VampireWithSpecificClearTotal                                (82),
     AgentFinishTotal                                             (83),
@@ -101,6 +95,13 @@ public enum AchievementCondition {
     DailyShopReceiveShopTotal                                    (105),
     AgentApplyTotal                                              (106),
     DiscSpecific                                                 (114),
+    StorySetClearSpecific                                        (116),
+    CharacterWithSpecificSkillAndLevel                           (118),
+    DiscWithSpecificQuantityLevelAndAttr                         (119),
+    TutorialLevelClearSpecific                                   (120),
+    TutorialLevelSpecificClearTotal                              (121),
+    DiscWithSpecificQuantityPhaseAndAttr                         (122),
+    WeekBossClearTotal                                           (123),
     ClientReport                                                 (200),
     TowerBattleTimes                                             (501),
     TowerBossChallengeSpecificHighRewardWithTotal                (502),
@@ -137,7 +138,8 @@ public enum AchievementCondition {
     TowerSpecificSecondarySkillActivateTotal                     (536),
     TowerSpecificGetExtraNoteLvTotal                             (537),
     TowerSweepTimes                                              (539),
-    TowerSweepTotal                                              (540);
+    TowerSweepTotal                                              (540),
+    TowerBattleWithPartner                                       (541);
 
     @Getter
     private final int value;

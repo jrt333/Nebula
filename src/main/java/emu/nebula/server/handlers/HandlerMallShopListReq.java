@@ -19,7 +19,7 @@ public class HandlerMallShopListReq extends NetHandler {
     public byte[] handle(GameSession session, byte[] message) throws Exception {
         var rsp = MallShopProductList.newInstance();
         
-        long refreshTime = Nebula.getCurrentTime() + TimeUnit.DAYS.toSeconds(30);
+        long refreshTime = Nebula.getCurrentServerTime() + TimeUnit.DAYS.toSeconds(30);
         
         for (var data : GameData.getMallShopDataTable()) {
             if (data.getStock() <= 0) {

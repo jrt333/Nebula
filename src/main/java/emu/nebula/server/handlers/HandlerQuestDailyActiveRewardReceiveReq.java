@@ -13,7 +13,7 @@ public class HandlerQuestDailyActiveRewardReceiveReq extends NetHandler {
     @Override
     public byte[] handle(GameSession session, byte[] message) throws Exception {
         // Receive rewards
-        var change = session.getPlayer().getQuestManager().claimActiveRewards();
+        var change = session.getPlayer().getQuestManager().claimDailyActiveRewards();
         
         if (change == null) {
             return session.encodeMsg(NetMsgId.quest_daily_active_reward_receive_failed_ack);

@@ -227,7 +227,7 @@ public class Nebula {
     /**
      * Returns the current server time in seconds
      */
-    public static long getCurrentTime() {
+    public static long getCurrentServerTime() {
         return System.currentTimeMillis() / 1000;
     }
     

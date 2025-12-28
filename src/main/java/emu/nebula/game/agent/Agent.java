@@ -23,7 +23,7 @@ public class Agent {
     
     public Agent(AgentDef data, int duration, int[] charIds) {
         this.id = data.getId();
-        this.start = Nebula.getCurrentTime();
+        this.start = Nebula.getCurrentServerTime();
         this.duration = duration;
         this.charIds = charIds;
         

@@ -16,7 +16,7 @@ Latest nightly compiled server jar: [Nightly](https://nightly.link/Melledy/Nebul
 - Daily quests
 - Battle pass
 - Gacha
-- Friend system (sending energy not implemented)
+- Friend system
 - Shop (only in-game currency supported)
 - Commissions
 - Heartlink

@@ -119,6 +119,9 @@ public class GameContext implements Runnable {
             this.epochWeeks = Utils.getWeeks(this.epochDays);
             this.epochMonths = Utils.getMonths(this.epochDays);
             
+            // Update score boss season
+            this.getScoreBossModule().updateSeason();
+            
             // Reset dailies for players
             this.resetDailies();
         }

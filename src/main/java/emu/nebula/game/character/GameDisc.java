@@ -58,7 +58,7 @@ public class GameDisc implements GameDatabaseObject {
         this.data = data;
         this.discId = data.getId();
         this.level = 1;
-        this.createTime = Nebula.getCurrentTime();
+        this.createTime = Nebula.getCurrentServerTime();
     }
     
     public void setPlayer(Player player) {

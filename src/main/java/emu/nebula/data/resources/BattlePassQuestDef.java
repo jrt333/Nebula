@@ -23,6 +23,11 @@ public class BattlePassQuestDef extends BaseDef implements QuestData {
         return Id;
     }
     
+    @Override
+    public long getQuestKey() {
+        return Id;
+    }
+    
     public boolean isDaily() {
         return this.Type == 1;
     }

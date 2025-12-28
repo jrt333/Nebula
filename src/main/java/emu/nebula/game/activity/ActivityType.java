@@ -18,7 +18,11 @@ public enum ActivityType {
     Avg           (10),
     Task          (11),
     Shop          (12),
-    Advertise     (13);
+    Advertise     (13),
+    BDConvert     (14),
+    Breakout      (15),
+    TrekkerVersus (16),
+    Story         (17);
 
     @Getter
     private final int value;

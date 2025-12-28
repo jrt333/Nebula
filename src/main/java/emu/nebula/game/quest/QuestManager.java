@@ -1,6 +1,7 @@
 package emu.nebula.game.quest;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,9 +35,10 @@ public class QuestManager extends PlayerManager implements GameDatabaseObject {
     
     // Daily activity missions
     private IntSet claimedActiveIds;
+    private IntSet claimedWeeklyIds;
     
     // Quests
-    private Map<Integer, GameQuest> quests;
+    private Map<Long, GameQuest> list;
     
     // Level rewards
     private Bitset levelRewards;
@@ -53,13 +55,28 @@ public class QuestManager extends PlayerManager implements GameDatabaseObject {
         super(player);
         this.uid = player.getUid();
         this.claimedActiveIds = new IntOpenHashSet();
-        this.quests = new HashMap<>();
+        this.claimedWeeklyIds = new IntOpenHashSet();
+        this.list = new HashMap<>();
         this.levelRewards = new Bitset();
         this.hasDailyReward = true;
         
-        this.resetDailyQuests();
+        this.resetDailyQuests(true);
         
         this.save();
+    }
+    
+    public synchronized GameQuest getQuest(int type, int questId) {
+        long key = ((long) type << 32) + questId;
+        return this.list.get(key);
+    }
+    
+    public synchronized GameQuest addQuest(GameQuest quest) {
+        this.list.put(quest.getKey(), quest);
+        return quest;
+    }
+    
+    public synchronized Collection<GameQuest> getQuests() {
+        return this.getList().values();
     }
     
     public boolean hasDailyReward() {
@@ -70,34 +87,15 @@ public class QuestManager extends PlayerManager implements GameDatabaseObject {
         Nebula.getGameDatabase().update(this, this.getUid(), "levelRewards", this.levelRewards);
     }
     
-    public synchronized int getActivity() {
-        int activity = 0;
-        
-        for (var quest : getQuests().values()) {
-            if (quest.getType() != QuestType.Daily) {
-                continue;
-            }
-            
-            if (!quest.isClaimed()) {
-                continue;
-            }
-            
-            var data = GameData.getDailyQuestDataTable().get(quest.getId());
-            if (data == null) {
-                continue;
-            }
-            
-            activity += data.getActive();
-        }
-        
-        return activity;
-    }
-    
-    public synchronized void resetDailyQuests() {
+    public synchronized void resetDailyQuests(boolean resetWeekly) {
         // Reset daily quests
         for (var data : GameData.getDailyQuestDataTable()) {
             // Get quest
-            var quest = getQuests().computeIfAbsent(data.getId(), i -> new GameQuest(data));
+            var quest = getList().get(data.getQuestKey());
+            
+            if (quest == null) {
+                quest = this.addQuest(new GameQuest(data));
+            }
             
             // Reset progress
             quest.resetProgress();
@@ -106,8 +104,31 @@ public class QuestManager extends PlayerManager implements GameDatabaseObject {
             this.syncQuest(quest);
         }
         
+        // Reset weekly quests
+        if (resetWeekly) {
+            for (var data : GameData.getWeeklyQuestDataTable()) {
+                // Get quest
+                var quest = getList().get(data.getQuestKey());
+                
+                if (quest == null) {
+                    quest = this.addQuest(new GameQuest(data));
+                }
+                
+                // Reset progress
+                quest.resetProgress();
+                
+                // Sync quest with player client
+                this.syncQuest(quest);
+            }
+            
+            // Reset weekly ids
+            this.claimedWeeklyIds.clear();
+        }
+        
         // Reset activity
         this.claimedActiveIds.clear();
+        
+        // Reset daily shop reward
         this.hasDailyReward = true;
         
         // Persist to database
@@ -115,7 +136,11 @@ public class QuestManager extends PlayerManager implements GameDatabaseObject {
     }
 
     public synchronized void trigger(int condition, int progress, int param1, int param2) {
-        for (var quest : getQuests().values()) {
+        // TODO optimize so we dont loop through every quest
+        for (var entry : getList().entrySet()) {
+            // Get quest from entry
+            var quest = entry.getValue();
+            
             // Try to trigger quest
             boolean result = quest.trigger(condition, progress, param1, param2);
             
@@ -128,7 +153,7 @@ public class QuestManager extends PlayerManager implements GameDatabaseObject {
             this.syncQuest(quest);
             
             // Update in database
-            Nebula.getGameDatabase().update(this, this.getUid(), "quests." + quest.getId(), quest);
+            Nebula.getGameDatabase().update(this, this.getUid(), "list." + entry.getKey(), quest);
         }
     }
     
@@ -146,21 +171,48 @@ public class QuestManager extends PlayerManager implements GameDatabaseObject {
         );
     }
     
-    public PlayerChangeInfo receiveQuestReward(int questId) {
+    // Daily quests
+    
+    public synchronized int getDailyActivity() {
+        int activity = 0;
+        
+        for (var quest : this.getQuests()) {
+            if (quest.getType() != QuestType.Daily) {
+                continue;
+            }
+            
+            if (!quest.isClaimed()) {
+                continue;
+            }
+            
+            var data = GameData.getDailyQuestDataTable().get(quest.getId());
+            if (data == null) continue;
+            
+            activity += data.getActive();
+        }
+        
+        return activity;
+    }
+    
+    public PlayerChangeInfo receiveDailyQuestReward(int questId) {
         // Get received quests
         var claimList = new ArrayList<GameQuest>();
         
         if (questId > 0) {
             // Claim specific quest
-            var quest = this.getQuests().get(questId);
+            var quest = this.getQuest(QuestType.Daily, questId);
             
             if (quest != null && !quest.isClaimed()) {
                 claimList.add(quest);
             }
         } else {
             // Claim all
-            for (var quest : this.getQuests().values()) {
-                if (!quest.isComplete() || quest.isClaimed()) {
+            for (var quest : this.getQuests()) {
+                if (quest.getType() != QuestType.Daily) {
+                    continue;
+                }
+                
+                if (!quest.canClaim()) {
                     continue;
                 }
                 
@@ -189,7 +241,7 @@ public class QuestManager extends PlayerManager implements GameDatabaseObject {
             quest.setClaimed(true);
             
             // Update in database
-            Nebula.getGameDatabase().update(this, this.getUid(), "quests." + quest.getId(), quest);
+            Nebula.getGameDatabase().update(this, this.getUid(), "list." + quest.getKey(), quest);
         }
         
         // Trigger quest
@@ -199,12 +251,12 @@ public class QuestManager extends PlayerManager implements GameDatabaseObject {
         return change.setSuccess(true);
     }
     
-    public PlayerChangeInfo claimActiveRewards() {
+    public PlayerChangeInfo claimDailyActiveRewards() {
         // Init
         var claimList = new IntArrayList();
         var rewards = new ItemParamMap();
         
-        int activity = this.getActivity();
+        int activity = this.getDailyActivity();
         
         // Get claimable 
         for (var data : GameData.getDailyQuestActiveDataTable()) {
@@ -239,6 +291,129 @@ public class QuestManager extends PlayerManager implements GameDatabaseObject {
         // Success
         return change.setSuccess(true);
     }
+    
+    // Weekly quests
+    
+    public synchronized int getWeeklyActivity() {
+        int activity = 0;
+        
+        for (var quest : getQuests()) {
+            if (quest.getType() != QuestType.Weekly) {
+                continue;
+            }
+            
+            if (!quest.isClaimed()) {
+                continue;
+            }
+            
+            var data = GameData.getWeeklyQuestDataTable().get(quest.getId());
+            if (data == null) continue;
+            
+            activity += data.getActive();
+        }
+        
+        return activity;
+    }
+    
+    public PlayerChangeInfo receiveWeeklyQuestReward(int questId) {
+        // Get received quests
+        var claimList = new ArrayList<GameQuest>();
+        
+        if (questId > 0) {
+            // Claim specific quest
+            var quest = this.getQuest(QuestType.Weekly, questId);
+            
+            if (quest != null && !quest.isClaimed()) {
+                claimList.add(quest);
+            }
+        } else {
+            // Claim all
+            for (var quest : this.getQuests()) {
+                if (quest.getType() != QuestType.Weekly) {
+                    continue;
+                }
+                
+                if (!quest.canClaim()) {
+                    continue;
+                }
+                
+                claimList.add(quest);
+            }
+        }
+        
+        // Sanity check
+        if (claimList.isEmpty()) {
+            return null;
+        }
+
+        // Create change info
+        var change = new PlayerChangeInfo();
+        
+        // Claim
+        for (var quest : claimList) {
+            // Get data
+            var data = GameData.getWeeklyQuestDataTable().get(quest.getId());
+            if (data != null) {
+                // Add reward data
+                this.getPlayer().getInventory().addItem(data.getItemTid(), data.getItemQty(), change);
+            }
+            
+            // Set claimed
+            quest.setClaimed(true);
+            
+            // Update in database
+            Nebula.getGameDatabase().update(this, this.getUid(), "list." + quest.getKey(), quest);
+        }
+        
+        // Trigger quest
+        this.getPlayer().trigger(QuestCondition.QuestWithSpecificType, claimList.size(), QuestType.Weekly);
+        
+        // Success
+        return change.setSuccess(true);
+    }
+    
+    public PlayerChangeInfo claimWeeklyActiveRewards() {
+        // Init
+        var claimList = new IntArrayList();
+        var rewards = new ItemParamMap();
+        
+        int activity = this.getWeeklyActivity();
+        
+        // Get claimable 
+        for (var data : GameData.getWeeklyQuestActiveDataTable()) {
+            if (this.getClaimedWeeklyIds().contains(data.getId())) {
+                continue;
+            }
+            
+            if (activity >= data.getActive()) {
+                // Add rewards
+                rewards.add(data.getRewards());
+                
+                // Add to claimed activity list
+                claimList.add(data.getId());
+            }
+        }
+        
+        // Sanity check
+        if (claimList.isEmpty()) {
+            return null;
+        }
+        
+        // Add rewards
+        var change = this.getPlayer().getInventory().addItems(rewards);
+        
+        // Set claimed list
+        change.setExtraData(claimList);
+        
+        // Update in database
+        this.getClaimedWeeklyIds().addAll(claimList);
+        Nebula.getGameDatabase().update(this, this.getUid(), "claimedWeeklyIds", this.getClaimedWeeklyIds());
+        
+        // Success
+        return change.setSuccess(true);
+    }
+    
+    // World level rewards
     
     public PlayerChangeInfo receiveWorldClassReward(int id) {
         // Get rewards we want to claim
@@ -287,9 +462,9 @@ public class QuestManager extends PlayerManager implements GameDatabaseObject {
         return change.setSuccess(true);
     }
     
-    // Daily reward
+    // Daily shop reward
     
-    public PlayerChangeInfo claimDailyReward() {
+    public PlayerChangeInfo claimDailyShopGift() {
         // Sanity check
         if (!this.hasDailyReward) {
             return null;
@@ -310,18 +485,50 @@ public class QuestManager extends PlayerManager implements GameDatabaseObject {
         return change.setSuccess(true);
     }
     
+    // Database
+    
+    @Override
+    public void onLoad() {
+        boolean shouldSave = false;
+        
+        // Fix missing weekly quests
+        if (this.claimedWeeklyIds == null) {
+            this.claimedWeeklyIds = new IntOpenHashSet();
+            shouldSave = true;
+        }
+        
+        // Fix quest lists
+        if (this.getList() == null) {
+            this.list = new HashMap<>();
+            this.resetDailyQuests(true);
+            
+            // QuestManager::resetDailyQuests will save to the database, so we dont need to set the shouldSave flag
+            shouldSave = false;
+        }
+        
+        // Save to database
+        if (shouldSave) {
+            this.save();
+        }
+    }
+    
     // Serialization
     
     public void encodePlayerInfo(PlayerInfo proto) {
+        // Quests proto
         var quests = proto.getMutableQuests();
         
-        for (var quest : this.getQuests().values()) {
+        for (var quest : this.getQuests()) {
             quests.addList(quest.toProto());
         }
         
         // Set claimed activity ids
         for (int id : this.getClaimedActiveIds()) {
             proto.addDailyActiveIds(id);
+        }
+        
+        for (int id : this.getClaimedWeeklyIds()) {
+            proto.addWeeklyActiveIds(id);
         }
         
         // Set world level rewards

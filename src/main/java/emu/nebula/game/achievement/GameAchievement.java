@@ -92,7 +92,7 @@ public class GameAchievement {
         // Check if completed
         if (this.getCurProgress() >= this.getMaxProgress()) {
             this.curProgress = this.getMaxProgress();
-            this.completed = Nebula.getCurrentTime();
+            this.completed = Nebula.getCurrentServerTime();
             return true;
         }
         

@@ -31,7 +31,7 @@ public class HandlerGachaSpinReq extends NetHandler {
         
         // Build response
         var rsp = GachaSpinResp.newInstance()
-                .setTime(Nebula.getCurrentTime())
+                .setTime(Nebula.getCurrentServerTime())
                 .setAMissTimes(result.getInfo().getMissTimesA())
                 .setAupMissTimes(result.getInfo().getMissTimesA())
                 .setTotalTimes(result.getInfo().getTotal())

@@ -75,6 +75,7 @@ public class Player implements GameDatabaseObject {
     private int skinId;
     private int titlePrefix;
     private int titleSuffix;
+    private long music;
     private int[] honor;
     private int[] showChars;
     private int[] boards;
@@ -146,7 +147,7 @@ public class Player implements GameDatabaseObject {
         
         // Set basic info
         this.accountUid = account.getUid();
-        this.createTime = Nebula.getCurrentTime();
+        this.createTime = Nebula.getCurrentServerTime();
         
         this.name = name;
         this.signature = "";
@@ -344,6 +345,22 @@ public class Player implements GameDatabaseObject {
         return true;
     }
     
+    public boolean setMusic(long id) {
+        // Make sure we own the disc
+        if (id != 0 && !this.getCharacters().hasDisc((int) id)) {
+            return false;
+        }
+        
+        // Set main menu music
+        this.music = id;
+        
+        // Update in database
+        Nebula.getGameDatabase().update(this, this.getUid(), "music", this.getMusic());
+        
+        // Success
+        return true;
+    }
+    
     public boolean setSkin(int skinId) {
         // Skip if we are setting the same skin
         if (this.skinId == skinId) {
@@ -405,8 +422,20 @@ public class Player implements GameDatabaseObject {
         
         // Verify that we have the honor titles
         for (int id : honorIds) {
-            if (id != 0 && !getInventory().getHonorList().contains(id)) {
-                System.out.println(id);
+            // Empty honor title
+            if (id == 0) {
+                continue;
+            }
+            
+            // Make sure we own the honor title
+            if (!getInventory().hasHonor(id)) {
+                return false;
+            }
+            
+            // Make sure honor exists and won't crash the client
+            var honor = GameData.getHonorDataTable().get(id);
+            
+            if (honor == null || !honor.isValid()) {
                 return false;
             }
         }
@@ -532,7 +561,7 @@ public class Player implements GameDatabaseObject {
     
     public int getEnergy() {
         // Cache time
-        long time = Nebula.getCurrentTime();
+        long time = Nebula.getCurrentServerTime();
         
         // Calculate time diff
         double diff = time - this.energyLastUpdate;
@@ -675,7 +704,7 @@ public class Player implements GameDatabaseObject {
 
     public void resetDailies(boolean resetWeekly, boolean resetMonthly) {
         // Reset daily quests
-        this.getQuestManager().resetDailyQuests();
+        this.getQuestManager().resetDailyQuests(resetWeekly);
         this.getBattlePassManager().getBattlePass().resetDailyQuests(resetWeekly);
         
         // Check to reset weeklies
@@ -728,6 +757,7 @@ public class Player implements GameDatabaseObject {
         
         if (manager != null) {
             manager.setPlayer(this);
+            manager.onLoad();
         } else {
             try {
                 manager = cls.getDeclaredConstructor(Player.class).newInstance(this);
@@ -788,6 +818,12 @@ public class Player implements GameDatabaseObject {
         // See if we need to reset dailies
         this.checkResetDailies();
         
+        // Fix any broken honor ids
+        this.checkBrokenHonor();
+        
+        // Update activities
+        this.getActivityManager().onLogin();
+        
         // Update last login time
         this.lastLogin = System.currentTimeMillis();
         Nebula.getGameDatabase().update(this, this.getUid(), "lastLogin", this.getLastLogin());
@@ -815,14 +851,44 @@ public class Player implements GameDatabaseObject {
         }
     }
     
+    /**
+     * Checks the player's honor ids to make sure they don't crash the client
+     */
+    private void checkBrokenHonor() {
+        boolean changed = false;
+        
+        for (int i = 0; i < this.honor.length; i++) {
+            int honorId = this.honor[i];
+            
+            if (honorId == 0) {
+                continue;
+            }
+            
+            // Get honor data
+            var honor = GameData.getHonorDataTable().get(honorId);
+            
+            // Check if honor is valid
+            if (honor == null || !honor.isValid()) {
+                this.honor[i] = 0;
+                changed = true;
+            }
+        }
+        
+        // Update in database
+        if (changed) {
+            Nebula.getGameDatabase().update(this, this.getUid(), "honor", this.getHonor());
+        }
+    }
+    
     // Proto
 
     public PlayerInfo toProto() {
         PlayerInfo proto = PlayerInfo.newInstance()
-                .setServerTs(Nebula.getCurrentTime())
+                .setServerTs(Nebula.getCurrentServerTime())
                 .setSigninIndex(this.getSignInIndex())
                 .setTowerTicket(this.getProgress().getTowerTickets())
                 .setDailyShopRewardStatus(this.getQuestManager().hasDailyReward())
+                .setMusicInfo(this.getMusic())
                 .setAchievements(new byte[64]);
         
         var acc = proto.getMutableAcc()
@@ -907,7 +973,8 @@ public class Player implements GameDatabaseObject {
         state.getMutableAchievement()
             .setNew(this.getAchievementManager().hasNewAchievements());
         
-        state.getMutableFriendEnergy();
+        state.getMutableFriendEnergy()
+            .setState(this.getFriendList().hasEnergy());
         state.getMutableMallPackage();
         state.getMutableTravelerDuelQuest()
             .setType(QuestType.TravelerDuel);
@@ -1023,7 +1090,7 @@ public class Player implements GameDatabaseObject {
     }
     
     public Energy getEnergyProto() {
-        long nextDuration = Math.max(GameConstants.ENERGY_REGEN_TIME - (Nebula.getCurrentTime() - getEnergyLastUpdate()), 1);
+        long nextDuration = Math.max(GameConstants.ENERGY_REGEN_TIME - (Nebula.getCurrentServerTime() - getEnergyLastUpdate()), 1);
         
         var proto = Energy.newInstance()
                 .setUpdateTime(this.getEnergyLastUpdate())

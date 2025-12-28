@@ -68,6 +68,14 @@ public class ActivityManager extends PlayerManager implements GameDatabaseObject
             if (data == null) {
                 it.remove();
                 this.queueSave = true;
+                continue;
+            }
+            
+            // Remove activities that are not in the activity module
+            if (!Nebula.getGameContext().getActivityModule().getActivities().contains(activity.getId())) {
+                it.remove();
+                this.queueSave = true;
+                continue;
             }
             
             // Set data
@@ -111,15 +119,25 @@ public class ActivityManager extends PlayerManager implements GameDatabaseObject
         
         // TODO improve activity creation
         GameActivity activity = switch (data.getType()) {
+            case LoginReward -> new LoginRewardActivity(this, data);
             case TowerDefense -> new TowerDefenseActivity(this, data);
             case Trial -> new TrialActivity(this, data);
             case Levels -> new LevelsActivity(this, data);
             case Task -> new TaskActivity(this, data);
             case Shop -> new ShopActivity(this, data);
+            case TrekkerVersus -> new TrekkerVersusActivity(this, data);
             default -> null;
         };
         
         return activity;
+    }
+    
+    // Events
+    
+    public synchronized void onLogin() {
+        for (var activity : this.getActivities().values()) {
+            activity.onLogin();
+        }
     }
 
     // Database

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import emu.nebula.Nebula;
+import emu.nebula.data.GameData;
 import emu.nebula.game.GameContext;
 import emu.nebula.game.GameContextModule;
 import emu.nebula.proto.ScoreBossRank.ScoreBossRankData;
@@ -11,6 +12,8 @@ import lombok.Getter;
 
 @Getter
 public class ScoreBossModule extends GameContextModule {
+    private int seasonId;
+    
     private long lastUpdate;
     private long nextUpdate;
     private List<ScoreBossRankData> ranking;
@@ -21,9 +24,25 @@ public class ScoreBossModule extends GameContextModule {
         this.ranking = new ArrayList<>();
     }
     
-    // TODO calculate from bin data
     public int getControlId() {
-        return 2;
+        return this.seasonId;
+    }
+    
+    public void updateSeason() {
+        int season = 1;
+        long time = Nebula.getCurrentServerTime();
+        
+        for (var data : GameData.getScoreBossControlDataTable()) {
+            if (data.getId() <= season) {
+                continue;
+            }
+            
+            if (time >= data.getStartDate()) {
+                season = data.getId();
+            }
+        }
+        
+        this.seasonId = season;
     }
     
     private long getRefreshTime() {
@@ -56,6 +75,6 @@ public class ScoreBossModule extends GameContextModule {
         }
         
         this.nextUpdate = System.currentTimeMillis() + this.getRefreshTime();
-        this.lastUpdate = Nebula.getCurrentTime();
+        this.lastUpdate = Nebula.getCurrentServerTime();
     }
 }

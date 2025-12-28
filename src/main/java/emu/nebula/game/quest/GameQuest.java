@@ -35,6 +35,10 @@ public class GameQuest {
             this.param = data.getCompleteCondParams()[1];
         }
     }
+    
+    public long getKey() {
+        return ((long) this.getType() << 32) + this.getId();
+    }
 
     public void resetProgress() {
         this.curProgress = 0;
@@ -43,6 +47,10 @@ public class GameQuest {
     
     public boolean isComplete() {
         return this.curProgress >= this.maxProgress;
+    }
+    
+    public boolean canClaim() {
+        return this.isComplete() && !this.isClaimed();
     }
     
     private int getStatus() {

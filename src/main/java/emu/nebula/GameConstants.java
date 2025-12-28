@@ -6,25 +6,26 @@ import emu.nebula.game.inventory.ItemParam;
 import emu.nebula.util.WeightedList;
 
 public class GameConstants {
-    public static final String VERSION = "1.3.0";
+    public static final String VERSION = "1.4.0";
     public static int DATA_VERSION = 0;
     
     // Set data versions for each region
+    // TODO move this to a json file inside the jar to make it easier to auto-update
     static {
         RegionConfig.getRegion("global")
-            .setDataVersion(69);
+            .setDataVersion(74);
         
         RegionConfig.getRegion("kr")
-            .setDataVersion(76);
+            .setDataVersion(81);
         
         RegionConfig.getRegion("jp")
-            .setDataVersion(72);
+            .setDataVersion(78);
         
         RegionConfig.getRegion("tw")
-            .setDataVersion(70);
+            .setDataVersion(75);
 
         RegionConfig.getRegion("cn")
-            .setDataVersion(70);
+            .setDataVersion(75);
     }
     
     public static final ZoneId UTC_ZONE = ZoneId.of("UTC");
@@ -32,6 +33,7 @@ public class GameConstants {
     public static final String PROTO_BASE_TYPE_URL = "type.googleapis.com/proto.";
     
     public static final int INTRO_GUIDE_ID = 1;
+    public static final int DEFAULT_HONOR_ID = 111001;
 
     public static final int GOLD_ITEM_ID = 1;
     public static final int GEM_ITEM_ID = 2;

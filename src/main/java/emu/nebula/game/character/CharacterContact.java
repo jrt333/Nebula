@@ -109,7 +109,7 @@ public class CharacterContact {
         chat.report(process, options, end);
         
         // Set trigger time
-        this.triggerTime = Nebula.getCurrentTime();
+        this.triggerTime = Nebula.getCurrentServerTime();
         
         // Add next chat
         this.addNextChat();

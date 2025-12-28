@@ -97,9 +97,11 @@ public class GameData {
     
     @Getter private static DataTable<MainScreenCGDef> MainScreenCGDataTable = new DataTable<>();
     
-    // ===== Daily Quests =====
+    // ===== Daily/Weekly Quests =====
     @Getter private static DataTable<DailyQuestDef> DailyQuestDataTable = new DataTable<>();
     @Getter private static DataTable<DailyQuestActiveDef> DailyQuestActiveDataTable = new DataTable<>();
+    @Getter private static DataTable<WeeklyQuestDef> WeeklyQuestDataTable = new DataTable<>();
+    @Getter private static DataTable<WeeklyQuestActiveDef> WeeklyQuestActiveDataTable = new DataTable<>();
     
     // ===== Achievements =====
     @Getter private static DataTable<AchievementDef> AchievementDataTable = new DataTable<>();
@@ -153,6 +155,9 @@ public class GameData {
     
     // ===== Activity =====
     @Getter private static DataTable<ActivityDef> ActivityDataTable = new DataTable<>();
+    
+    // Activity: Login Reward
+    @Getter private static DataTable<LoginRewardGroupControlDef> LoginRewardGroupControlDataTable = new DataTable<>();
 
     // Activity: Tower Defense
     @Getter private static DataTable<TowerDefenseLevelDef> TowerDefenseLevelDataTable = new DataTable<>();

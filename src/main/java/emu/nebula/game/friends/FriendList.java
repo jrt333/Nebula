@@ -1,6 +1,7 @@
 package emu.nebula.game.friends;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import emu.nebula.GameConstants;
@@ -11,9 +12,12 @@ import emu.nebula.game.player.PlayerManager;
 import emu.nebula.net.NetMsgId;
 import emu.nebula.proto.FriendListGet.FriendListGetResp;
 import emu.nebula.proto.Public.FriendDetail;
+import emu.nebula.proto.Public.FriendEnergyState;
 import emu.nebula.proto.Public.FriendState;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.longs.LongArrayList;
+import it.unimi.dsi.fastutil.longs.LongList;
 import lombok.Getter;
 import us.hebi.quickbuf.RepeatedLong;
 
@@ -88,6 +92,12 @@ public class FriendList extends PlayerManager {
      */
     public int getFullFriendCount() {
         return this.getPendingFriends().size() + this.getFriends().size();
+    }
+    
+    public synchronized boolean hasEnergy() {
+        return this.getFriends().values()
+                .stream()
+                .anyMatch(f -> f.getEnergy() > 0);
     }
     
     public synchronized Player handleFriendRequest(int targetUid, boolean action) {
@@ -263,6 +273,127 @@ public class FriendList extends PlayerManager {
         this.cacheCooldown = 0;
     }
     
+    // Energy
+    
+    public synchronized LongList sendEnergy(RepeatedLong uids) {
+        // Get friendships
+        Collection<Friendship> list = null;
+        
+        if (uids.length() == 0) {
+            list = this.getFriends().values();
+        } else {
+            list = new ArrayList<>();
+            
+            for (long uid : uids) {
+                var friend = this.getFriendById((int) uid);
+                
+                if (friend == null) {
+                    continue;
+                }
+                
+                list.add(friend);
+            }
+        }
+        
+        // Send energy
+        var results = new LongArrayList();
+        
+        for (var friend : list) {
+            // Sanity
+            if (!friend.canSendEnergy()) {
+                continue;
+            }
+            
+            // Update last send timestamp
+            friend.updateLastSendEnergy();
+            friend.save();
+            
+            // Add to results
+            results.add(friend.getFriendUid());
+            
+            // Send energy to friend
+            Player target = getGameContext().getPlayerModule().getCachedPlayerByUid(friend.getFriendUid());
+            
+            if (target != null) {
+                // Get friend's friendship
+                var theirFriendship = target.getFriendList().getFriendById(this.getPlayer().getUid());
+                
+                // Send energy
+                theirFriendship.sendEnergy();
+                theirFriendship.save();
+                
+                if (target.isLoaded()) {
+                    // Send message to notify friend that we sent them energy
+                    target.addNextPackage(
+                        NetMsgId.friend_energy_state_notify, 
+                        FriendEnergyState.newInstance()
+                            .setState(true)
+                    );
+                }
+            }
+        }
+        
+        // Clear friend list cache
+        if (results.size() > 0) {
+            this.cacheCooldown = 0;
+        }
+        
+        // Complete
+        return results;
+    }
+    
+    public synchronized FriendRecvEnergyResult recvEnergy(RepeatedLong uids) {
+        // Get friendships
+        Collection<Friendship> list = null;
+        
+        if (uids.length() == 0) {
+            list = this.getFriends().values();
+        } else {
+            list = new ArrayList<>();
+            
+            for (long uid : uids) {
+                var friend = this.getFriendById((int) uid);
+                
+                if (friend == null) {
+                    continue;
+                }
+                
+                list.add(friend);
+            }
+        }
+        
+        // Send energy
+        var result = new FriendRecvEnergyResult();
+        
+        for (var friend : list) {
+            // Skip if we dont have energy
+            if (friend.getEnergy() <= 0) {
+                continue;
+            }
+            
+            // Add uid
+            result.getUids().add(friend.getFriendUid());
+            
+            // Claim energy
+            result.addEnergy(friend.recvEnergy());
+            
+            // Save to database
+            friend.save();
+        }
+        
+        // Add energy
+        if (result.getEnergy() > 0) {
+            // Add energy to player
+            this.getPlayer().addEnergy(result.getEnergy(), result.getChange());
+            
+            // Clear friend list cache
+            this.cacheCooldown = 0;
+        }
+        
+        // Complete
+        return result;
+    }
+    
     // Database
     
     public synchronized void loadFromDatabase() {
@@ -305,6 +436,7 @@ public class FriendList extends PlayerManager {
             var info = FriendDetail.newInstance()
                     .setBase(base)
                     .setStar(friend.isStar())
+                    .setSendEnergy(!friend.canSendEnergy())
                     .setGetEnergy(friend.getEnergy());
             
             // Add

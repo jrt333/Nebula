@@ -21,7 +21,9 @@ public class Friendship implements GameDatabaseObject {
     
     @Setter private boolean isFriend;
     @Setter private boolean star;
-    @Setter private int energy;
+    
+    private int energy;
+    private long lastSend;
     
     @Setter private transient Player player;
     
@@ -34,6 +36,24 @@ public class Friendship implements GameDatabaseObject {
         this.friendUid = friend.getUid();
         this.askerUid = asker.getUid();
         this.key = Friendship.generateUniqueKey(player.getUid(), friend.getUid());
+    }
+
+    public boolean canSendEnergy() {
+        return this.lastSend != this.getPlayer().getLastEpochDay();
+    }
+    
+    public void updateLastSendEnergy() {
+        this.lastSend = this.getPlayer().getLastEpochDay();
+    }
+    
+    public void sendEnergy() {
+        this.energy = 1;
+    }
+    
+    public int recvEnergy() {
+        int amount = this.energy;
+        this.energy = 0;
+        return amount;
     }
     
     // Database functions

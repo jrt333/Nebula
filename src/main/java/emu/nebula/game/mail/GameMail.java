@@ -37,7 +37,7 @@ public class GameMail {
         this.author = author;
         this.subject = subject;
         this.desc = desc;
-        this.time = Nebula.getCurrentTime();
+        this.time = Nebula.getCurrentServerTime();
         this.expiry = this.time + TimeUnit.DAYS.toSeconds(30);
     }
     

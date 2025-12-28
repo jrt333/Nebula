@@ -11,7 +11,7 @@ public class HandlerDailyShopRewardReceiveReq extends NetHandler {
     @Override
     public byte[] handle(GameSession session, byte[] message) throws Exception {
         // Claim daily reward
-        var change = session.getPlayer().getQuestManager().claimDailyReward();
+        var change = session.getPlayer().getQuestManager().claimDailyShopGift();
         
         if (change == null) {
             return session.encodeMsg(NetMsgId.daily_shop_reward_receive_failed_ack);

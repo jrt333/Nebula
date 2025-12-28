@@ -24,4 +24,11 @@ public abstract class PlayerManager {
     public int getPlayerUid() {
         return this.getPlayer().getUid();
     }
+    
+    /**
+     * Called when the manager is loaded from the database
+     */
+    public void onLoad() {
+        
+    }
 }

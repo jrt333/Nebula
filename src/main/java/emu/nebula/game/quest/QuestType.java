@@ -1,5 +1,6 @@
 package emu.nebula.game.quest;
 
+// From public.proto
 public class QuestType {
     public static final int UnknownQuest = 0;
     public static final int TourGuide = 1;
@@ -14,4 +15,6 @@ public class QuestType {
     public static final int Tower = 10;
     public static final int Demon = 11;
     public static final int TowerEvent = 12;
+    public static final int Weekly = 13;
+    public static final int Assist = 14;
 }

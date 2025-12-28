@@ -15,13 +15,13 @@ public class HandlerQuestDailyRewardReceiveReq extends NetHandler {
         var req = UI32.parseFrom(message);
         
         // Receive rewards
-        var change = session.getPlayer().getQuestManager().receiveQuestReward(req.getValue());
+        var change = session.getPlayer().getQuestManager().receiveDailyQuestReward(req.getValue());
         
         if (change == null) {
             return session.encodeMsg(NetMsgId.quest_daily_reward_receive_failed_ack);
         }
         
-        // Template
+        // Encode and send
         return session.encodeMsg(NetMsgId.quest_daily_reward_receive_succeed_ack, change.toProto());
     }
 

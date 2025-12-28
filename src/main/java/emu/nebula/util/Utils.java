@@ -6,6 +6,7 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -86,10 +87,6 @@ public class Utils {
      */
     public static boolean createFolder(String path) {
         return new File(path).mkdirs();
-    }
-
-    public static long getCurrentSeconds() {
-        return Math.floorDiv(System.currentTimeMillis(), 1000);
     }
 
     public static int getMinAdvanceForLevel(int level) {
@@ -335,5 +332,10 @@ public class Utils {
         return Instant.ofEpochMilli(timestamp)
                 .atZone(GameConstants.UTC_ZONE)
                 .format(DateTimeFormatter.ofPattern(pattern));
+    }
+
+    public static long dateToMilliseconds(String dateString) {
+        var offsetDateTime = OffsetDateTime.parse(dateString, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        return offsetDateTime.toInstant().toEpochMilli();
     }
 }

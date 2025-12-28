@@ -152,8 +152,8 @@ public class Config {
             this.sender = "GM";
             this.content = "欢迎来到大鸟转转转-星塔旅人！QQ交流群：531390126，祝你游戏愉快！";
             this.attachments = List.of(
-                new ItemParam(86009, 1),
-                new ItemParam(86002, 1),
+                new ItemParam(86009, 20),
+                new ItemParam(86002, 20),
                 new ItemParam(1, 1_0000_000),
                 new ItemParam(2, 30_0000));
         }

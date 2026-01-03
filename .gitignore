@@ -70,6 +70,9 @@ tmp/
 /*.jar
 /*.sh
 
+# Custom external data version json
+/versions.json
+
 # Extra
 Nebula Handbook.txt
 config.json

@@ -9,25 +9,6 @@ public class GameConstants {
     public static final String VERSION = "1.4.0";
     public static int DATA_VERSION = 0;
     
-    // Set data versions for each region
-    // TODO move this to a json file inside the jar to make it easier to auto-update
-    static {
-        RegionConfig.getRegion("global")
-            .setDataVersion(75);
-        
-        RegionConfig.getRegion("kr")
-            .setDataVersion(82);
-        
-        RegionConfig.getRegion("jp")
-            .setDataVersion(79);
-        
-        RegionConfig.getRegion("tw")
-            .setDataVersion(76);
-
-        RegionConfig.getRegion("cn")
-            .setDataVersion(77);
-    }
-    
     public static final ZoneId UTC_ZONE = ZoneId.of("UTC");
     
     public static final String PROTO_BASE_TYPE_URL = "type.googleapis.com/proto.";

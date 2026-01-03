@@ -3,6 +3,7 @@ package emu.nebula;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,16 +43,19 @@ public class Nebula {
     @Getter private static CommandManager commandManager;
     @Getter private static PluginManager pluginManager;
     
+    private static boolean generateHandbook = true;
+    
     public static void main(String[] args) {
-        // Load config first
-        Nebula.loadConfig();
-        
         // Start Server
         Nebula.getLogger().info("Starting Nebula " + getJarVersion());
         Nebula.getLogger().info("Git hash: " + getGitHash());
-        Nebula.getLogger().info("Game version: " + GameConstants.getGameVersion());
         
-        boolean generateHandbook = true;
+        // Load config and data versions first
+        Nebula.loadConfig();
+        Nebula.loadDataVersions();
+        
+        // Output game version
+        Nebula.getLogger().info("Game version: " + GameConstants.getGameVersion());
         
         // Load keys
         AeadHelper.loadKeys();
@@ -179,6 +183,46 @@ public class Nebula {
             file.write(gson.toJson(config));
         } catch (Exception e) {
             getLogger().error("Config save error");
+        }
+    }
+    
+    // Data versions
+    
+    public static void loadDataVersions() {
+        // Data versions
+        Map<String, Integer> versions = null;
+        
+        // Get version file
+        var file = new File("./versions.json");
+        
+        if (file.exists()) {
+            // Load data versions from an external file first, in case the internal versions.json is out of date
+            try (FileReader reader = new FileReader(file)) {
+                versions = JsonUtils.loadToMap(reader, String.class, Integer.class);
+            } catch (Exception e) {
+                // Ignored
+            }
+        }
+        
+        if (versions == null) {
+            // Loads data versions from the internal versions.json from the jar resources
+            try (var stream = Nebula.class.getResourceAsStream("/versions.json"); var reader = new InputStreamReader(stream)) {
+                versions = JsonUtils.loadToMap(reader, String.class, Integer.class);
+            } catch (Exception e) {
+                // Ignored
+            }
+        }
+        
+        // Sanity check
+        if (versions == null) {
+            Nebula.getLogger().error("Could not load versions.json!");
+            return;
+        }
+        
+        // Load data version for region
+        for (var entry : versions.entrySet()) {
+            RegionConfig.getRegion(entry.getKey())
+                .setDataVersion(entry.getValue());
         }
     }
     
